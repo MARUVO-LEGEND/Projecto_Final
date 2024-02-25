@@ -1,0 +1,174 @@
+<AboutAppScreen>:
+    name:"AboutAppScreen"
+
+    MDFloatLayout:
+        MDIconButton:
+
+            icon:"arrow-right"
+            pos_hint:{"right":True,"top":True}
+            on_release:
+                root.manager.transition.direction="left"
+                root.manager.current="LoginScreen"
+
+
+    MDBoxLayout:
+        padding:50
+        md_bg_color:0,0,0,0
+
+
+
+        MDScrollView:
+            radius:[20, 20, 20, 20]
+            md_bg_color:1,1,1,0
+
+
+            MDGridLayout:
+                radius:[20, 20, 20, 20]
+
+                cols:1
+                adaptive_height:True
+                spacing:dp(30)
+                padding:dp(50)
+
+                MDLabel:
+                    text:"\n\n\n\n"
+
+
+
+                MDLabel:
+                    text:"MAGNA"
+                    font_name:"fonts/static/Montserrat-Light.ttf"
+                    font_size:200
+                    size_hint_y: None
+                    pos_hint:{"center_x":0.5,"center_y":.7}
+
+                    halign:"center"
+
+                MDLabel:
+                    text:"\n\n\n\n"
+
+                MDLabel:
+                    text:"Bem-vindo ao aplicativo de monitoramento escolar MAGNA, desenvolvido por uma equipe dedicada de programadores composta por Mauro Martins, Mario Pereira e Josemar Nzola. Nosso objetivo principal é proporcionar um ambiente escolar mais seguro e confiável por meio da integração de tecnologias avançadas.\n\nVersão Beta 1.0"
+                    font_name:"fonts/static/Montserrat-Medium.ttf"
+                    font_size:20
+                    size_hint_y:None
+                    pos_hint:{"center_x":0.5,"center_y":0.5}
+                    halign:"center"
+
+
+
+                MDLabel:
+                    text:"Recursos Principais:"
+                    font_name:"fonts/static/Montserrat-Light.ttf"
+                    font_size:40
+                    bold:True
+                    size_hint_y: None
+                    halign:"center"
+                    pos_hint:{"center_x":0.5,"center_y":.7}
+
+
+
+                MDLabel:
+                    name:"Title"
+                    text:"Monitoramento em Tempo Real:"
+                    font_name:"fonts/static/Montserrat-Light.ttf"
+                    font_size:30
+                    bold:True
+                    size_hint_y: None
+                    pos_hint:{"center_x":0.5,"center_y":1}
+                MDLabel:
+                    name:"Caption"
+                    text:"Utilizando a biblioteca cv2, nosso aplicativo MAGNA permite o monitoramento em tempo real das áreas escolares designadas. As câmeras instaladas fornecem uma visão abrangente para garantir a segurança dos alunos e funcionários."
+                    font_name:"fonts/static/Montserrat-Light.ttf"
+                    font_size:20
+                    size_hint_y: None
+                    pos_hint:{"center_x":0.5,"center_y":.5}
+
+                MDLabel:
+                    name:"Title"
+                    text:"Reconhecimento Facial:"
+                    font_name:"fonts/static/Montserrat-Light.ttf"
+                    font_size:30
+                    bold:True
+                    size_hint_y: None
+                    pos_hint:{"center_x":0.5,"center_y":.7}
+
+                MDLabel:
+                    name:"Caption"
+                    text:"Integramos a poderosa biblioteca face-reconition para implementar a tecnologia de reconhecimento facial no aplicativo MAGNA. Isso garante uma identificação rápida e precisa de pessoas presentes no recinto, contribuindo para um controle de acesso mais eficiente."
+                    font_name:"fonts/static/Montserrat-Light.ttf"
+                    font_size:20
+                    size_hint_y: None
+                    pos_hint:{"center_x":0.5,"center_y":.5}
+
+                MDLabel:
+                    name:"Title"
+                    text:"Interface Gráfica Intuitiva:"
+                    font_name:"fonts/static/Montserrat-Light.ttf"
+                    font_size:30
+                    bold:True
+                    size_hint_y: None
+                    pos_hint:{"center_x":0.5,"center_y":.7}
+
+                MDLabel:
+                    name:"Caption"
+                    text:"Desenvolvemos a interface do usuário usando as bibliotecas kivy e kivymd para garantir uma experiência de usuário intuitiva e agradável no aplicativo MAGNA. Os usuários podem facilmente navegar pelos recursos do aplicativo sem complicações."
+                    font_name:"fonts/static/Montserrat-Light.ttf"
+                    font_size:20
+                    size_hint_y: None
+                    pos_hint:{"center_x":0.5,"center_y":.5}
+
+                MDLabel:
+                    name:"Title"
+                    text:"Registro de Presença"
+                    font_name:"fonts/static/Montserrat-Light.ttf"
+                    font_size:30
+                    bold:True
+                    size_hint_y: None
+                    pos_hint:{"center_x":0.5,"center_y":.7}
+
+                MDLabel:
+                    name:"Caption"
+                    text:"O aplicativo MAGNA mantém um registro de presença dos alunos e funcionários, usando o reconhecimento facial para marcar automaticamente a entrada e saída. Isso cria um sistema eficiente para o monitoramento da presença no ambiente escolar."
+                    font_name:"fonts/static/Montserrat-Light.ttf"
+                    font_size:20
+                    size_hint_y: None
+                    pos_hint:{"center_x":0.5,"center_y":.5}
+
+                MDLabel:
+                    name:"Title"
+                    text:"Alertas de Segurança"
+                    font_name:"fonts/static/Montserrat-Light.ttf"
+                    font_size:30
+                    bold:True
+                    size_hint_y: None
+                    pos_hint:{"center_x":0.5,"center_y":.7}
+
+                MDLabel:
+                    name:"Caption"
+                    text:"O aplicativo MAGNA mantém um registro de presença dos alunos e funcionários, usando o reconhecimento facial para marcar automaticamente a entrada e saída. Isso cria um sistema eficiente para o monitoramento da presença no ambiente escolar."
+                    font_name:"fonts/static/Montserrat-Light.ttf"
+                    font_size:20
+                    size_hint_y: None
+                    pos_hint:{"center_x":0.5,"center_y":.5}
+
+                MDLabel:
+                    name:"Title"
+                    text:"Customização e Configuração"
+                    font_name:"fonts/static/Montserrat-Light.ttf"
+                    font_size:30
+                    bold:True
+                    size_hint_y: None
+                    pos_hint:{"center_x":0.5,"center_y":.7}
+
+
+                MDLabel:
+                    name:"Caption"
+                    text:"Oferecemos recursos avançados de personalização para atender às necessidades específicas de cada escola no aplicativo MAGNA. Os administradores podem configurar áreas de monitoramento, adicionar ou remover usuários autorizados e ajustar as configurações de alerta conforme necessário."
+                    font_name:"fonts/static/Montserrat-Light.ttf"
+                    font_size:20
+                    size_hint_y: None
+                    pos_hint:{"center_x":0.5,"center_y":.5}
+
+
+

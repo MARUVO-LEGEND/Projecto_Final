@@ -1,0 +1,41 @@
+<ChoiceScreen>:
+    name:"ChoiceScreen"
+
+    MDBoxLayout:
+        padding:200
+        orientation:"horizontal"
+        spacing:20
+        MDCard:
+            md_bg_color:app.theme_cls.primary_color
+            radius:[20, 20,20,20 ]
+            elevation:3.5
+            ripple_behavior: True
+            on_release:app.change_screen_right(root.manager,"SignInScreen")
+
+            Image:
+                source:"images/1.png"
+            MDLabel:
+                text:"Cadastrar"
+                halign:"center"
+                font_name:"fonts/static/Montserrat-Bold.ttf"
+                color:"white"
+                font_size:30
+        MDCard:
+            md_bg_color:app.theme_cls.primary_color
+            radius:[20, 20, 20,20 ]
+            elevation:3.5
+            ripple_behavior: True
+            on_release:app.change_screen_right(root.manager,"UsersInformationScreen")
+
+            Image:
+                source:"images/2.png"
+
+
+            MDLabel:
+                text:"Informações"
+                halign:"center"
+                font_name:"fonts/static/Montserrat-Bold.ttf"
+                color:"white"
+                font_size:30
+
+

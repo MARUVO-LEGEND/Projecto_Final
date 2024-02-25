@@ -1,0 +1,86 @@
+<ConfigUsersInformationScreen>
+
+    MDBoxLayout:
+
+        padding:100
+
+        MDIconButton:
+            icon:"arrow-left"
+            theme_text_color:"Primary"
+            pos_hint:{"center_y":.97,"center_x":.98}
+            on_release:
+                app.change_screen_left(root.manager,"UsersInformationScreen")
+
+        MDBoxLayout:
+            radius:[20,20,20,20]
+            md_bg_color:app.theme_cls.primary_color
+            elevation:3
+            padding:1
+
+            MDBoxLayout:
+                radius:[20,20,20,20]
+                md_bg_color:.2,.2,.2,1
+
+
+                MDFloatLayout:
+                    MDLabel:
+                        text:"Configurações"
+                        font_name:"fonts/static/Montserrat-Light.ttf"
+                        font_size:40
+                        pos_hint:{"center_x":.88,"center_y":.95}
+
+
+                    MDLabel:
+                        text:"Tema"
+                        font_name:"fonts/static/Montserrat-Medium.ttf"
+                        font_size:20
+                        pos_hint:{"center_x":.98,"center_y":.20}
+                    MDCard:
+                        md_bg_color:.1,.1,.1,1
+                        radius:[20,20,20,20]
+                        spacing:10
+                        size_hint_y:.12
+                        size_hint_x:.35
+
+                        pos_hint:{"center_x":.5,"center_y":.1}
+
+                        MDFloatLayout:
+                            MDRectangleFlatButton:
+                                text: "Vermelho"
+                                theme_text_color: "Custom"
+                                text_color: "red"
+                                line_color: "red"
+                                size_hint_x:.25
+                                pos_hint:{"center_x":.20 ,"center_y":.5}
+                                on_release:
+                                    app.theme_red()
+
+                            MDRectangleFlatButton:
+                                text: "Laranja"
+                                theme_text_color: "Custom"
+                                text_color:"orange"
+                                line_color:"orange"
+                                size_hint_x:.25
+                                pos_hint:{"center_x":.5 ,"center_y":.5}
+                                on_release:
+                                    app.theme_orange()
+
+
+                            MDRectangleFlatButton:
+                                text: "Azul"
+                                theme_text_color: "Custom"
+                                text_color:"blue"
+                                line_color:"blue"
+                                size_hint_x:.25
+                                pos_hint:{"center_x":.80 ,"center_y":.5}
+                                on_release:
+                                    app.theme_blue()
+    MDFloatLayout:
+        MDIconButton:
+            text:"Logout"
+            icon:"exit-to-app"
+            pos_hint:{"center_y":.97,"center_x":.98}
+            color:1,1,1,1
+            on_release:
+                app.change_screen_right(root.manager,"LoginScreen")
+                app.show_snackbar("Logout")

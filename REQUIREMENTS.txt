@@ -1,0 +1,8 @@
+Download
+
+kivy
+kivymd
+kivy-deps
+kaki
+watchdog
+opencv-python

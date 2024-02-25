@@ -1,0 +1,141 @@
+<SignInScreen>
+    name:"SignInScreen"
+
+    MDBoxLayout:
+        orientation:"vertical"
+
+        MDTopAppBar:
+            md_bg_color:app.theme_cls.primary_color
+            title:"MAGNA"
+            id:"menu"
+            left_action_items: [["arrow-left", lambda x: app.change_screen_left(root.manager,"ChoiceScreen")]]
+
+
+        MDBoxLayout:
+            orientation:"horizontal"
+            MDBoxLayout:
+                orientation:"vertical"
+                MDBoxLayout:
+                    MDFloatLayout:
+                        Image:
+                            id:container
+                            source:"images/icon_capture.png"
+                            pos_hint:{"center_y":0.1,"center_x":.5}
+                            size_hint: None, None
+                            size: 500, 500
+
+                MDBoxLayout:
+                    MDFloatLayout:
+                        MDFillRoundFlatButton:
+                            id:btn
+                            text:"Capturar"
+                            md_bg_color:app.theme_cls.primary_color
+                            pos_hint:{"center_y":.1,"center_x":.40}
+                            on_release:app.start_capture_sign(container,btn)
+                            pos_hint:{"center_y":.2,"center_x":.5}
+
+
+            MDBoxLayout:
+                MDFloatLayout:
+                    spacing:35
+                    orientation:"vertical"
+
+                    MDLabel:
+                        text:"Digite os Dados"
+                        font_name:"fonts/static/Montserrat-Bold.ttf"
+                        pos_hint:{"center_y":.98,"center_x":.8}
+
+                    MDTextField:
+                        id:Nome
+                        hint_text:"Nome"
+                        helper_text: "Digite o Nome Completo"
+                        helper_text_mode: "on_focus"
+                        size_hint_x:.8
+                        pos_hint:{"center_y":.9,"center_x":.4}
+                        mode:"fill"
+                        required:True
+                    MDTextField:
+                        id:Nascimento
+                        hint_text:"Nascimento"
+                        helper_text: "Enter a valid dd/mm/yyyy date"
+                        validator: "date"
+                        date_format: "yyyy/mm/dd"
+                        helper_text_mode:"on_focus"
+                        pos_hint:{"center_y":.75,"center_x":.1}
+                        size_hint_x:.2
+                        mode:"fill"
+                        required:True
+
+                    MDTextField:
+                        id:Turno
+                        hint_text:"Turno"
+                        helper_text:"Manhã/Tarde"
+                        helper_text_mode:"on_focus"
+                        pos_hint:{"center_y":.6,"center_x":.1}
+                        size_hint_x:.2
+                        max_text_length: 5
+                        mode:"fill"
+                        required:True
+                    MDTextField:
+                        id:Turma
+                        hint_text:"Turma"
+                        helper_text:"TI10A"
+                        helper_text_mode:"on_focus"
+                        pos_hint:{"center_y":.6,"center_x":.4}
+                        max_text_length: 5
+
+                        size_hint_x:.2
+                        mode:"fill"
+                        required:True
+
+
+                    MDTextField:
+                        id:N_estudante
+                        hint_text:"Nº"
+                        pos_hint:{"center_y":.6,"center_x":.7}
+
+                        helper_text:"01"
+                        helper_text_mode:"on_focus"
+                        mode:"fill"
+                        max_text_length: 2
+                        required:True
+                        size_hint_x:.1
+
+                    MDTextField:
+                        id:N_id
+                        hint_text:"Nº de Estudante"
+                        helper_text:"Ex:00000"
+                        helper_text_mode:"on_focus"
+                        max_text_length: 5
+                        size_hint_x:.3
+                        pos_hint:{"center_y":.45,"center_x":.15}
+                        mode:"fill"
+                        required:True
+
+
+                    MDTextField:
+                        id:Numero_Encarregado
+                        hint_text:"Numero Do Encarregado"
+                        helper_text: "Digite o Numero Do Encarregado"
+                        helper_text_mode: "on_focus"
+                        size_hint_x:.3
+                        pos_hint:{"center_y":2,"center_x":.8}
+                        mode:"fill"
+                        required:True
+
+                    MDFillRoundFlatButton:
+                        text:"Guardar  Dados"
+                        md_bg_color:app.theme_cls.primary_color
+                        pos_hint:{"center_y":.1,"center_x":.45}
+                        on_release:app.sign_in_send(Nome.text,N_id.text,N_estudante.text,Turma.text,Nascimento.text,Turno.text)
+
+
+
+
+
+    MDFloatLayout:
+        MDIconButton:
+            icon:"cog-outline"
+            pos_hint:{"center_y":.97,"center_x":.96}
+            color:1,1,1,1
+            on_release:app.change_screen_right(root.manager,"ConfigMonitoramentScreen")

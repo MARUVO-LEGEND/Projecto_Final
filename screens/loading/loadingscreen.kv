@@ -1,0 +1,24 @@
+<LoadingScreen>:
+    name:"LoadingScreen"
+
+
+    BoxLayout:
+        orientation: 'vertical'
+        md_bg_color:.9,.9,0,1
+
+        MDFloatLayout:
+
+            MDLabel:
+                text:"MAGNA"
+                font_name:"fonts/static/Montserrat-Light.ttf"
+                pos_hint:{"center_x":0.91,"center_y":0.5}
+                font_size:70
+
+            MDSpinner:
+                size_hint: None, None
+                size: dp(350), dp(350)
+                active: True
+                pos_hint:{"center_x":0.5,"center_y":0.5}
+
+
+
