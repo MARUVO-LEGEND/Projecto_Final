@@ -1,60 +1,52 @@
-import mysql.connector
+from kivy import App
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.recycleview import RecycleView
+from kivy.uix.recycleview.views import RecycleDataViewBehavior
+from kivy.uix.button import Button
+from kivy.properties import BooleanProperty, ObjectProperty
 
+class AlunoInfoButton(Button):
+    aluno = ObjectProperty(None)
 
-Nomes=[]
+class AlunoInfoView(BoxLayout):
+    nome = ObjectProperty(None)
+    idade = ObjectProperty(None)
+    curso = ObjectProperty(None)
 
-class Connection():
+class AlunoListItem(RecycleDataViewBehavior, BoxLayout):
+    selected = BooleanProperty(False)
+    aluno = ObjectProperty(None)
 
-    def Cadastro(self,nome,n_id,turma):
+    def refresh_view_attrs(self, rv, index, data):
+        self.index = index
+        self.aluno = data['aluno']
+        self.nome.text = self.aluno.nome
 
+    def on_touch_down(self, touch):
+        if self.collide_point(*touch.pos):
+            self.parent.selected_index = self.index
+            return True
+        return super().on_touch_down(touch)
 
-        comando = f'insert into aluno (nome, n_i_escolar, turma) values ("{nome}", "{n_id}", "{turma}")'
-        self.cursor.execute(comando)
-        self.conexao.commit()
-        print("Aluno registado!")
-        self.cursor.close()
-        self.conexao.close()
+class AlunoList(RecycleView):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.data = [{'aluno': Aluno(f'Aluno {i}', 20 + i, 'Curso') } for i in range(50)]
 
-    def connect_to_database(self):
-        try:
+    def show_aluno_info(self, aluno):
+        self.parent.parent.info_view.nome.text = aluno.nome
+        self.parent.parent.info_view.idade.text = str(aluno.idade)
+        self.parent.parent.info_view.curso.text = aluno.curso
 
-            conn = mysql.connector.connect(
-                host="localhost",
-                user="root",
-                password="",
-                database="magna_db"
-            )
-            print("Conexão bem-sucedida!")
-            return conn
-        except mysql.connector.Error as err:
-            print(f"Erro ao conectar ao banco de dados: {err}")
-            return None
+class Aluno:
+    def __init__(self, nome, idade, curso):
+        self.nome = nome
+        self.idade = idade
+        self.curso = curso
 
-    def consult_admin(self,conn):
-        try:
-            cursor = conn.cursor()
-            consulta_admin = "SELECT * FROM administrador"
+class MyApp(App):
+    def build(self):
+        return AlunoList()
 
-            cursor.execute(consulta_admin)
-            resultados_admin = cursor.fetchall()
-
-
-            for linha in resultados_admin:
-                print(linha)
-
-            consulta_secre = "SELECT * FROM secretario"
-            cursor.execute(consulta_secre)
-            resultados_secre=cursor.fetchall()
-
-            for linha in resultados_secre:
-                print(linha)
-
-        except mysql.connector.Error as err:
-            print(f"Erro ao inserir usuário: {err}")
-
-
-
-Connection().consult_admin(Connection().connect_to_database())
-
-
-dict
+if __name__ == '__main__':
+    MyApp().run()

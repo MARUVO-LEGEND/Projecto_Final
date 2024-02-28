@@ -1,12 +1,15 @@
 import os
+import re
 from unidecode import unidecode
 from kivymd.app import MDApp
+from kivymd.uix.dialog import MDDialog
 from kaki.app import App
 from kivy.factory import Factory
 from kivy.core.window import Window
 from kivymd.uix.snackbar import Snackbar
-from kivymd.uix.list import OneLineRightIconListItem
-from kivymd.uix.list import IconRightWidget
+from kivymd.uix.anchorlayout import MDAnchorLayout
+from kivymd.uix.datatables import MDDataTable
+from kivymd.uix.button import MDRaisedButton
 # Importaçãos de Aplicção Externa
 import mysql.connector
 from kivy.clock import Clock
@@ -371,6 +374,7 @@ class LiveApp(MDApp, App):
                 resultados_alunos = cursor.fetchall()
 
                 for linha in resultados_alunos:
+
                     aluno={}
                     aluno["id"]=linha[0]
                     aluno["nome"]=linha[1]
@@ -418,9 +422,8 @@ class LiveApp(MDApp, App):
         except mysql.connector.Error as err:
             print(f"Erro ao inserir usuário: {err}")
 
-    def teste(self):
-        print("teste completo")
-
+    def lista_aluno(self,root):
+        pass
     def show_aluno_data(self,id,container_imagem,container_texto):
 
         for aluno in self.alunos:
@@ -439,27 +442,102 @@ class LiveApp(MDApp, App):
 
                 container_texto.value=f"Nome: {nome}\nNº-Escolar: {n_i_escolar}\nNº-Turma: {n_i_turma}\nTurma: {turma}\nNascimento: {nascimento}\nTurno: {turno}"
 
-    def list_of_alunos(self,container,container_imagem,container_texto):
+
+    def show_dialog_aluno(self):
+
+        self.dialog = MDDialog(
+            title="Exemplo de Dialog",
+            text="Isso é um exemplo de como usar o Dialog no KivyMD",
+            buttons=[
+                MDRaisedButton(
+                    text="Fechar",
+                    on_release=self.close_dialog
+                ),
+                MDRaisedButton(
+                    text="Outro",
+                    on_release=self.another_function
+                )
+            ]
+        )
+        self.dialog.open()
+
+    def close_dialog(self, *args):
+        self.dialog.dismiss()
+
+    def another_function(self, *args):
+        print("Outra função do botão")
+
+
+
+
+    def on_row_press(self, instance_table, instance_row):
+        print(instance_table.row_data[0])
+        id_do_aluno = instance_row.text
+        print("ID do Aluno:", id_do_aluno)
+
+        if instance_row.selected:
+            self.show_dialog_aluno()
+
+
+
+
+
+
+    def list_of_alunos(self,container):
+
+        self.container_list_alunos=container
+
         if self.executatar_funcao_once==False:
             if self.connect_to_database():
                 self.receive_users_from_bd(self.connect_to_database())
                 print(self.alunos)
+
+                self.data_table=MDDataTable(
+                    size_hint=(0.9, 0.6),
+                    use_pagination=True,
+                    column_data=[
+                        ("", (5)),
+                        ("id", (30)),
+                        ("Nome", (30)),
+                        ("Turma", (30)),
+                        ("Nº Turma", (30)),
+                        ("Nº Escolar", (30)),
+                        ("Curso", (30)),
+                        ("Turno", (30)),
+                        ("Nascimento", (30)),
+
+                    ],
+                )
+                container.add_widget(self.data_table)
+                self.data_table.bind(on_row_press=self.on_row_press)
+
                 for aluno in self.alunos:
+
                     id=aluno["id"]
                     receber_nome=aluno["nome"]
                     nome_convertido=receber_nome.split()
                     nome=f"{nome_convertido[0]} {nome_convertido[-1]}"
                     turma=aluno["turma"]
+                    id_turma=aluno["n_i_turma"]
+                    id_escola=aluno["n_i_escolar"]
+                    if aluno["nascimento"]!=None:
+                        print(str(aluno["nascimento"]))
+                        nascimento_row=re.findall(r'\d+',str(aluno["nascimento"]))
+                        nascimento=f"{nascimento_row[2]}/{nascimento_row[1]}/{nascimento_row[0]}"
                     curso=""
+                    turno=aluno["turno"]
                     curso_tipo=turma[:2]
 
                     if curso_tipo=="TI":
                         curso="Técnico Informático"
 
-                    container.add_widget(
-                        OneLineRightIconListItem(IconRightWidget(icon="information",on_release=setattr()),text=f"Nome:{nome}   Turma:{turma}    Curso:{curso}" ,width=100)
-                    )
+                    if aluno["nascimento"]!=None:
 
+                        linha_aluno=[" ",("information",[1,1,1,1],f"  {id}"),nome,turma,id_turma,id_escola,curso,turno,nascimento,]
+                    else:
+                        linha_aluno=[" ",("information",[1,1,1,1],f"  {id}"),nome,turma,id_turma,id_escola,curso,turno," ",]
+
+                    self.data_table.row_data.append(linha_aluno)
 
                 self.executatar_funcao_once=True
 

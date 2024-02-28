@@ -3,7 +3,7 @@
 
     MDBoxLayout:
         orientation:"vertical"
-        on_touch_down:app.list_of_alunos(Lista_alunos,Container_Imagem,Container_Texto)
+        on_touch_down:app.list_of_alunos(Lista_alunos)
         MDTopAppBar:
             md_bg_color:app.theme_cls.primary_color
             title:"MAGNA"
@@ -21,25 +21,12 @@
             mode:"rectangle"
 
         MDBoxLayout:
-            orientation:"horizontal"
             padding:20
             MDScrollView:
-
-
                 id:Alunos_Container
-                MDList:
+                MDAnchorLayout:
                     id:Lista_alunos
-                    OneLineListItem:
-                        text: "Alunos"
-                        divider_color:app.theme_cls.primary_color
-            MDBoxLayout:
-                MDFloatLayout:
-                    Image:
-                        id:Container_Imagem
-                        source:"images/henry.jpeg"
-                        pos_hint:{"center_y":.5,"center_x":.5}
-                    MDLabel:
-                        id:Container_Texto
+
 
 
     MDFloatLayout:
