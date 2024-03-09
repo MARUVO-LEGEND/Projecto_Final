@@ -1,43 +1,48 @@
+from kivy.metrics import dp
+
 from kivymd.app import MDApp
-from kivy.uix.boxlayout import BoxLayout
 from kivymd.uix.datatables import MDDataTable
-from kivymd.uix.button import MDFlatButton
+from kivymd.uix.floatlayout import MDFloatLayout
+from kivymd.uix.button import MDRaisedButton
 
 
-class MyApp(MDApp):
+class Example(MDApp):
+    data_tables = None
+
     def build(self):
-        layout = BoxLayout(orientation='vertical')
+        self.theme_cls.theme_style = "Dark"
+        self.theme_cls.primary_palette = "Orange"
 
-        # Definindo os dados da tabela
-        data = {
-            "Header 1": "Value 1",
-            "Header 2": "Value 2",
-            "Header 3": "Value 3",
-        }
-
-        # Criando a tabela
-        table = MDDataTable(
-            size_hint=(0.9, 0.6),
-            use_pagination=True,
-            check=True,
-            column_data=[
-                ("Column 1", (30)),
-                ("Column 2", (30)),
-                ("Column 3", (30)),
-            ],
-            row_data=[
-                (f"{key}", f"{value}", f"Additional Data {value}") for key, value in data.items()
-            ]
+        layout = MDFloatLayout()
+        layout.add_widget(
+            MDRaisedButton(
+                text="Change 2 row",
+                pos_hint={"center_x": 0.5},
+                on_release=self.update_row,
+                y=24,
+            )
         )
+        self.data_tables = MDDataTable(
+            pos_hint={"center_y": 0.5, "center_x": 0.5},
+            size_hint=(0.9, 0.6),
+            use_pagination=False,
+            column_data=[
+                ("No.", dp(30)),
+                ("Column 1", dp(40)),
+                ("Column 2", dp(40)),
+                ("Column 3", dp(40)),
+            ],
+            row_data=[(f"{i + 1}", "1", "2", "3") for i in range(3)],
+        )
+        layout.add_widget(self.data_tables)
 
-        # Associando dados adicionais a cada linha da tabela
-        for row in table.row_data:
-            row.data = {"Additional_Info": row.text + " - Additional Info"}
-
-        # Adicionando a tabela ao layout
-        layout.add_widget(table)
         return layout
 
+    def update_row(self, instance_button: MDRaisedButton) -> None:
+        self.data_tables.update_row(
+            self.data_tables.row_data[0],  # old row data
+            ["2", "A", "B", "C"],          # new row data
+        )
 
-if __name__ == "__main__":
-    MyApp().run()
+
+Example().run()

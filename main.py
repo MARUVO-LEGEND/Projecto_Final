@@ -9,7 +9,10 @@ from kivy.core.window import Window
 from kivymd.uix.snackbar import Snackbar
 from kivymd.uix.anchorlayout import MDAnchorLayout
 from kivymd.uix.datatables import MDDataTable
-from kivymd.uix.button import MDRaisedButton
+from kivymd.uix.button import MDFlatButton
+from kivymd.uix.boxlayout import MDBoxLayout
+from kivymd.uix.scrollview import MDScrollView
+from kivymd.uix.textfield import MDTextField
 # Importaçãos de Aplicção Externa
 import mysql.connector
 from kivy.clock import Clock
@@ -43,6 +46,8 @@ class LiveApp(MDApp, App):
         os.path.join(os.getcwd(), "screens/configuration/configsigninscreen.kv"),
         os.path.join(os.getcwd(), "screens/configuration/configmonitoramentscreen.kv"),
         os.path.join(os.getcwd(), "screens/configuration/configusersinformationscreen.kv"),
+        os.path.join(os.getcwd(), "screens/configuration/configedituserinformationscreen.kv"),
+        os.path.join(os.getcwd(), "screens/secretaria/edituserinformationscreen.kv"),
     }
 
     # class to watch from *.py files
@@ -61,6 +66,8 @@ class LiveApp(MDApp, App):
         "ConfigMonitoramentScreen": "screens.configuration.configmonitoramentscreen",
         "ConfigSignInScreen": "screens.configuration.configsigninscreen",
         "ConfigUsersInformationScreen": "screens.configuration.configusersinformationscreen",
+        "ConfigEditUserInformationScreen": "screens.configuration.configedituserinformationscreen",
+        "EditUserInformationScreen": "screens.secretaria.edituserinformationscreen",
 
     }
 
@@ -75,20 +82,22 @@ class LiveApp(MDApp, App):
         Window.size = (1200, 600)
 
         self.administradores=[]
-
         self.secretarios=[]
-
-
         self.monitores=[]
-
-
         self.porteiros=[]
-
-
-
         self.alunos=[]
 
+        self.Nome_edit=None
+        self.Nascimento_edit=None
+        self.Turno_edit=None
+        self.Turma_edit=None
+        self.N_id_escolar=None
+        self.N_id_turma=None
+
         self.executatar_funcao_once=False
+
+        self.edit_image=False
+        self.id_edit_user=""
 
 
         self.theme_cls.theme_style_switch_animation = True
@@ -99,7 +108,7 @@ class LiveApp(MDApp, App):
         self.primary_theme.primary_hue = "800"
 
         self.cp_on = False
-        self.last_frame=None
+        self.last_frame=[None]
 
         self.SM = MainScreenManager()
 
@@ -181,10 +190,12 @@ class LiveApp(MDApp, App):
 
         for porteiro in self.porteiros:
 
-            if porteiro["nome"]==nome.text and porteiro["senha"]==senha.text:
-                existence_user.append(True)
+             if porteiro["nome"]==nome.text and porteiro["senha"]==senha.text:
+                user_exist=True
+                existence_user.append(user_exist)
                 Clock.schedule_once(lambda x: setattr(root_manager, "current", "MonitoramentScreen"), 5)
-            else:
+
+        else:
                 existence_user.append(False)
                 nome.error = True
                 senha.error = True
@@ -244,6 +255,21 @@ class LiveApp(MDApp, App):
         else:
             self.button_cp.text="Iniciar Captura"
             self.webcam.cancel()
+    def start_capture_edit(self, camera_image, button_cp):
+
+        self.capture = cv2.VideoCapture(0)
+        self.camera_image = camera_image
+
+        self.cp_on=True if self.cp_on==False else self.cp_on==False
+        self.button_cp = button_cp
+
+        if self.cp_on==True:
+            self.button_cp.text="Parar Captura"
+            self.webcam=Clock.schedule_interval(self.update_edit, 1.0 / 30.0)  # Atualiza a tela a cada 1/30 segundos
+
+        else:
+            self.button_cp.text="Iniciar Captura"
+            self.webcam.cancel()
 
     def save_last_frame(self, frame, nome, n_id_estudante):
         nome_formatado = nome.lower().replace(" ", "")
@@ -257,12 +283,51 @@ class LiveApp(MDApp, App):
         cv2.imwrite(caminho_completo, frame)
         return formatado
 
+    def update_user(self,conn,nome,n_id_escolar,n_id_turmaa,turma,nascimento,turno):
+        converter_nascimento=str(nascimento).split("/")
+        nascimento_convertido=f"{converter_nascimento[2]}/{converter_nascimento[1]}/{converter_nascimento[0]}"
+        id_convert=self.id_edit_user.split(" ")
+        id=int(id_convert[-1])
+        try:
+            cursor = conn.cursor()
+            sql = f'UPDATE aluno set nome="{str(nome)}",n_i_escolar={int(n_id_escolar)},n_i_turma={int(n_id_turmaa)},turma="{str(turma)}",nascimento="{str(nascimento_convertido)}",turno="{str(turno)}" where id_aluno={id}'
+            cursor.execute(sql)
+            conn.commit()
+            self.show_snackbar("Usuario Editado Com Sucesso!")
+            print("Usuário atualizados com sucesso!")
+            self.update_row_datatable(id)
+            self.change_screen_left(self.root_manager,"EditUserInformationScreen")
+        except mysql.connector.Error as err:
+            print(f"Erro ao atualizar usuário: {err}")
 
-    def sign_in_send(self,nome,n_id_escolar,n_id_turma,turma,nascimnto,turno):
-        foto_caminho_save=self.save_last_frame(self.last_frame,nome,n_id_escolar)
-        self.insert_user(self.connect_to_database(),nome,n_id_escolar,n_id_turma,turma,foto_caminho_save,nascimnto,turno)
-        Clock.schedule_once(self.show_snackbar("Usuario Guardado com Sucesso"))
+    def user_edit_send(self,Nome,N_id_turma,N_id_estudante,Turma,Nascimento,Turno):
+        if self.edit_image==True:
+            pass
+        self.update_user(self.connect_to_database(),Nome,N_id_turma,N_id_estudante,Turma,Nascimento,Turno)
 
+    def sign_in_send(self,nome,n_id_escolar,n_id_turma,turma,nascimento,turno):
+
+        if nome and n_id_turma and n_id_escolar and turma and nascimento and turno !="":
+
+            if None in self.last_frame:
+                self.show_snackbar("Termine de Tirar Foto!")
+
+            else:
+                converter_nascimento = str(nascimento).split("-")
+                print(converter_nascimento)
+                converter_nascimento2=converter_nascimento[0].replace("'","")
+                print(converter_nascimento2)
+                converter_nascimento3=converter_nascimento2.split("/")
+                print(converter_nascimento3)
+                nascimento_convertido = f"{converter_nascimento3[2]}/{converter_nascimento3[1]}/{converter_nascimento3[0]}"
+                print(nascimento_convertido)
+                foto_caminho_save=self.save_last_frame(self.last_frame,nome,n_id_escolar)
+                self.insert_user(self.connect_to_database(),nome,n_id_escolar,n_id_turma,turma,foto_caminho_save,nascimento_convertido,turno)
+                self.show_snackbar("Usuario Guardado com Sucesso")
+                self.last_frame=[None]
+
+        else:
+            self.show_snackbar("Termine de Colocar os Dados!")
     def update(self, dt):
         ret, frame = self.capture.read()
         if ret:
@@ -275,6 +340,16 @@ class LiveApp(MDApp, App):
             self.camera_image.texture = self.texture(frame_rgb)
 
     def update_sign(self, dt):
+        ret, frame = self.capture.read()
+        if ret:
+            # Converte a imagem de BGR para RGB para exibição no Kivy
+            frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            self.last_frame=frame
+            faces = face_cascade.detectMultiScale(frame_rgb, scaleFactor=1.3, minNeighbors=5)
+
+            # Atualiza a imagem na interface do usuário
+            self.camera_image.texture = self.texture(frame_rgb)
+    def update_edit(self, dt):
         ret, frame = self.capture.read()
         if ret:
             # Converte a imagem de BGR para RGB para exibição no Kivy
@@ -412,6 +487,43 @@ class LiveApp(MDApp, App):
             print(f"Erro ao conectar ao banco de dados: {err}")
             return None
 
+    def update_row_datatable(self,row):
+
+        self.alunos.clear()
+        self.receive_users_from_bd(self.connect_to_database())
+
+        aluno=self.alunos[int(row)-1]
+        print(aluno)
+        id = aluno["id"]
+        receber_nome = aluno["nome"]
+        nome_convertido = receber_nome.split()
+        nome = f"{nome_convertido[0]} {nome_convertido[-1]}"
+        print(nome)
+        turma = aluno["turma"]
+        id_turma = aluno["n_i_turma"]
+        id_escola = aluno["n_i_escolar"]
+        converter_nascimento = str(aluno["nascimento"]).split("-")
+        nascimento = f"{converter_nascimento[2]}/{converter_nascimento[1]}/{converter_nascimento[0]}"
+
+        turno=aluno["turno"]
+
+        curso = ""
+        turno = aluno["turno"]
+        curso_tipo = turma[:2]
+        print(curso_tipo)
+
+        if curso_tipo == "TI":
+            curso = "Técnico Informático"
+        if curso_tipo=="DT":
+            curso="Desenhador Projetista"
+
+
+        print(self.data_table.row_data[row-1])
+        self.data_table.update_row(
+            self.data_table.row_data[row-1],  # old row data
+            ["", ("information",[1,1,1,1],f"  {row}"), f"{nome}", f"{turma}",f"{id_turma}",f"{id_escola}",f"{curso}",f"{turno}",f"{nascimento}"],  # new row data
+        )
+        print(self.data_table.row_data[row-1])
     def insert_user(self, conn, nome,n_id_escolar,n_id_turma,turma,foto_caminho,nascimnto,turno):
         try:
             cursor = conn.cursor()
@@ -422,8 +534,96 @@ class LiveApp(MDApp, App):
         except mysql.connector.Error as err:
             print(f"Erro ao inserir usuário: {err}")
 
-    def lista_aluno(self,root):
-        pass
+    def save_edit_widgets(self,Nome,Nascimento,Turno,Turma,N_id_escolar,N_id_turma,container):
+
+        self.Nome_edit=Nome
+
+        self.Nascimento_edit=Nascimento
+        self.Turno_edit=Turno
+        self.Turma_edit=Turma
+        self.N_id_escolar_edit=N_id_escolar
+        self.N_id_turma_edit=N_id_turma
+        self.Container_imagem_edit=container
+
+    def delete_aluno_image(self,id):
+
+        nome=self.alunos[int(id)-1]["nome"]
+        id_esc=self.alunos[int(id)-1]["n_i_escolar"]
+
+        print(nome)
+        print(id_esc)
+
+        nome_formatado = nome.lower().replace(" ", "")
+        print(nome_formatado)
+        nome_formatado_sem_acentos = unidecode(nome_formatado)
+        print(nome_formatado_sem_acentos)
+        formatado = f"{nome_formatado_sem_acentos}{id_esc}.jpg"
+        print(formatado)
+        caminho_absoluto = r"C:\Users\venic\Programation\PycharmProjects\Project Final Course\Projecto_Final\faces_alunos"
+
+        for file in os.listdir(caminho_absoluto):
+            if file == formatado:
+
+                file=f"{caminho_absoluto}\{formatado}"
+                os.remove(file)
+    def delete_aluno(self, conn, id):
+
+        print(id)
+        try:
+            cursor = conn.cursor()
+
+            # Exclui imagem de identificação
+
+            self.delete_aluno_image(id)
+
+
+            # Exclui o aluno
+            delete_sql = f'DELETE FROM aluno WHERE id_aluno="{int(id)}"'
+            cursor.execute(delete_sql)
+            conn.commit()
+            print("Usuário Apagado com Sucesso!")
+
+            # Atualiza os IDs na tabela (assumindo que a tabela correta é 'tabela')
+            organize_sql = f"UPDATE aluno SET id_aluno = id_aluno - 1 WHERE id_aluno > {int(id)}"
+            cursor.execute(organize_sql)
+            conn.commit()
+            print("Usuários Organizados com Sucesso!")
+
+            # Atualiza a lista de alunos e a data_table
+            self.alunos.clear()
+            self.receive_users_from_bd(self.connect_to_database())
+            self.data_table.remove_row(self.data_table.row_data[int(id) - 1])
+
+
+            # Mostra a mensagem de sucesso
+            self.show_snackbar("Aluno Apagado com Sucesso!")
+
+        except mysql.connector.Error as err:
+            print(f"Erro ao Apagar Usuário: {err}")
+            # Se ocorrer um erro durante a exclusão, você pode querer lidar com isso aqui
+
+    def edit_aluno(self,*args):
+        print("entrou")
+
+        for arg in args:
+
+            self.edit_id_information=arg
+            self.change_screen_right(self.root_manager,"EditUserInformationScreen")
+            if self.root_manager.current=="EditUserInformationScreen":
+                self.close_dialog()
+                aluno=self.alunos[int(arg)-1]
+                self.Nome_edit.text=f"{aluno['nome']}"
+
+                converter_nascimento = str(aluno["nascimento"]).split("-")
+                nascimento = f"{converter_nascimento[2]}/{converter_nascimento[1]}/{converter_nascimento[0]}"
+
+                self.Nascimento_edit.text=f"{nascimento}"
+                self.Turno_edit.text=f"{aluno['turno']}"
+                self.Turma_edit.text=f"{aluno['turma']}"
+                self.N_id_turma_edit.text=f"{aluno['n_i_escolar']}"
+                self.N_id_escolar_edit.text=f"{aluno['n_i_turma']}"
+
+                self.Container_imagem_edit.source=f"faces_alunos/{str(aluno['foto_caminho'])}.jpg"
     def show_aluno_data(self,id,container_imagem,container_texto):
 
         for aluno in self.alunos:
@@ -441,24 +641,48 @@ class LiveApp(MDApp, App):
                 container_imagem.source=f"{caminho_absoluto}\{foto_caminho}.jpg"
 
                 container_texto.value=f"Nome: {nome}\nNº-Escolar: {n_i_escolar}\nNº-Turma: {n_i_turma}\nTurma: {turma}\nNascimento: {nascimento}\nTurno: {turno}"
+    def show_dialog_aluno(self,id):
 
+        # Criar um layout MDBoxLayout para conter os MDTextField
+        layout = MDBoxLayout(orientation="vertical", spacing="12dp", size_hint_y=None)
+        layout.bind(minimum_height=layout.setter('height'))
 
-    def show_dialog_aluno(self):
+        # Adicionar vários MDTextField ao layout
+        for _ in range(20):  # Adicione quantos MDTextField você precisar
+            textfield = MDTextField(hint_text="City")
+            layout.add_widget(textfield)
+
+        # Colocar o layout dentro de um ScrollView
+        scrollview = MDScrollView()
+        scrollview.add_widget(layout)
 
         self.dialog = MDDialog(
-            title="Exemplo de Dialog",
-            text="Isso é um exemplo de como usar o Dialog no KivyMD",
+            title="Alterar Informações",
+            type="custom",
+            text="Deseja Editar ou Apagar Informções Sobre o Aluno?",
             buttons=[
-                MDRaisedButton(
-                    text="Fechar",
-                    on_release=self.close_dialog
+                MDFlatButton(
+                    text="FECHAR",
+                    theme_text_color="Custom",
+                    text_color=self.theme_cls.primary_color,
+                    on_release=lambda x:self.close_dialog()
                 ),
-                MDRaisedButton(
-                    text="Outro",
-                    on_release=self.another_function
-                )
-            ]
+                MDFlatButton(
+                    text="EDITAR",
+                    theme_text_color="Custom",
+                    text_color=self.theme_cls.primary_color,
+                     on_release=lambda x:self.edit_aluno(id)
+                ),
+
+                MDFlatButton(
+                    text="APAGAR",
+                    theme_text_color="Custom",
+                    text_color=self.theme_cls.primary_color,
+                    on_release=lambda x:self.delete_aluno(self.connect_to_database(),id),
+                ),
+            ],
         )
+
         self.dialog.open()
 
     def close_dialog(self, *args):
@@ -467,21 +691,13 @@ class LiveApp(MDApp, App):
     def another_function(self, *args):
         print("Outra função do botão")
 
-
-
-
     def on_row_press(self, instance_table, instance_row):
         print(instance_table.row_data[0])
-        id_do_aluno = instance_row.text
-        print("ID do Aluno:", id_do_aluno)
-
-        if instance_row.selected:
-            self.show_dialog_aluno()
-
-
-
-
-
+        self.id_edit_user = instance_row.text
+        print("ID do Aluno:", self.id_edit_user)
+        print(len(instance_row.text))
+        if instance_row.selected and len(instance_row.text)==3:
+            self.show_dialog_aluno(self.id_edit_user)
 
     def list_of_alunos(self,container):
 
@@ -493,7 +709,8 @@ class LiveApp(MDApp, App):
                 print(self.alunos)
 
                 self.data_table=MDDataTable(
-                    size_hint=(0.9, 0.6),
+                    size_hint=(0.9, 0.9),
+
                     use_pagination=True,
                     column_data=[
                         ("", (5)),
@@ -530,6 +747,8 @@ class LiveApp(MDApp, App):
 
                     if curso_tipo=="TI":
                         curso="Técnico Informático"
+                    if curso_tipo=="DT":
+                        curso="Desenhador Projetista"
 
                     if aluno["nascimento"]!=None:
 
@@ -545,7 +764,6 @@ class LiveApp(MDApp, App):
                 self.show_snackbar("Erro Ao Conectar Com O Servidor")
         else:
             pass
-
 
 
 # finally, run the app
