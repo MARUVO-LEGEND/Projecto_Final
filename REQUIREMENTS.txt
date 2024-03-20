@@ -1,8 +1,6 @@
 Download
-
 kivy
 kivymd
-
 kaki
 watchdog
 opencv-python

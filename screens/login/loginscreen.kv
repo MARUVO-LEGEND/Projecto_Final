@@ -1,23 +1,50 @@
 
 <LoginScreen>:
     name:"LoginScreen"
+    on_leave: app.verificador_de_animacao(root.manager,container)
+    on_enter:
 
+
+
+    MDFloatLayout:
+        id:container
+
+        canvas.before:
+            Color:
+                rgba: 0.1, .1, .1, 1
+            Rectangle:
+                size: self.size
+                pos: self.pos
+
+
+        ParticleMesh:
+
+            canvas:
+                Color:
+                    rgba: 1, 1, 1, 1
+                Point:
+                    points: self.points
+                    pointsize: 2
 
 
     MDBoxLayout:
 
-        padding:60
+        padding:120
+
 
 
         MDBoxLayout:
-            md_bg_color:1,1,0,1
+            md_bg_color:.1,.1,.1,0.5
+
             radius:[20, 20, 20, 20]
             elevation:5
 
 
             MDFloatLayout:
                 md_bg_color:app.theme_cls.primary_color
+
                 radius:[20, 0, 0, 20]
+
                 elevation:3
 
 
@@ -27,6 +54,7 @@
                     font_size:100
                     pos_hint:{"center_x":0.5,"center_y":0.80}
                     halign:"center"
+                    opacity:1
                 MDLabel:
                     text:"Seja Bem Vindo"
                     font_name:"fonts/static/Montserrat-ExtraLight.ttf"
@@ -56,75 +84,78 @@
 
             MDFloatLayout:
 
-                md_bg_color:.2,.2,.2,1
+                md_bg_color:.02,.02,.02,1
+                opacity:.5
                 radius:[0, 20, 20, 0]
                 elevation:3
 
+    MDFloatLayout:
 
-                Image:
-                    source:"images/profile_icon.png"
-                    size_hint:(0.4,0.4)
-                    pos_hint:{"center_x":0.5,"center_y":0.8}
+        Image:
+            source:"images/profile_icon.png"
+            size_hint:(0.3,0.3)
+            pos_hint:{"center_x":0.7,"center_y":0.7}
 
 
 
 
-                MDLabel:
-                    text:"Faça Login Para Continuar"
-                    font_style:"H5"
-                    font_name:"fonts/static/Montserrat-Medium.ttf"
+        MDLabel:
+            text:"Faça Login Para Continuar"
+            font_style:"H5"
+            font_name:"fonts/static/Montserrat-Medium.ttf"
+            font_size:25
+            halign:"center"
+            pos_hint:{"center_x":0.7,"center_y":0.56}
 
-                    halign:"center"
-                    pos_hint:{"center_x":0.5,"center_y":0.62}
+        MDTextField:
+            id:Nome
+            hint_text:"Nome"
+            pos_hint:{"center_x":0.70,"center_y":0.5}
+            size_hint_x:.35
+            icon_right:"email"
 
-                MDTextField:
-                    id:Nome
-                    hint_text:"Nome"
-                    pos_hint:{"center_x":0.5,"center_y":0.5}
-                    size_hint_x:.8
-                    icon_right:"email"
+            icon_right_color:app.theme_cls.primary_color
+            text_color:app.theme_cls.primary_color
+            icon_right_color:app.theme_cls.primary_color
+            icon_right_color_normal:app.theme_cls.primary_color
+            icon_right_color_focus:app.theme_cls.primary_color
+            helper_text_color_focus:app.theme_cls.primary_color
+            helper_text_color_normal:app.theme_cls.primary_color
+            line_color_focus:app.theme_cls.primary_color
+            line_color_normal:app.theme_cls.primary_color
+            text_color_focus:app.theme_cls.primary_color
+            text_color_normal:app.theme_cls.primary_color
 
-                    icon_right_color:app.theme_cls.primary_color
-                    text_color:app.theme_cls.primary_color
-                    icon_right_color:app.theme_cls.primary_color
-                    icon_right_color_normal:app.theme_cls.primary_color
-                    icon_right_color_focus:app.theme_cls.primary_color
-                    helper_text_color_focus:app.theme_cls.primary_color
-                    helper_text_color_normal:app.theme_cls.primary_color
-                    line_color_focus:app.theme_cls.primary_color
-                    line_color_normal:app.theme_cls.primary_color
-                    text_color_focus:app.theme_cls.primary_color
-                    text_color_normal:app.theme_cls.primary_color
+        MDTextField:
+            id:Senha
+            hint_text:"Senha"
 
-                MDTextField:
-                    id:Senha
-                    hint_text:"Senha"
+            pos_hint:{"center_x":0.70,"center_y":0.4}
+            size_hint_x:0.35
 
-                    pos_hint:{"center_x":0.5,"center_y":0.4}
-                    size_hint_x:0.8
+            password:True
+            icon_right:"lock"
+            text_color:app.theme_cls.primary_color
+            icon_right_color:app.theme_cls.primary_color
+            icon_right_color_normal:app.theme_cls.primary_color
+            icon_right_color_focus:app.theme_cls.primary_color
+            helper_text_color_focus:app.theme_cls.primary_color
+            helper_text_color_normal:app.theme_cls.primary_color
+            line_color_focus:app.theme_cls.primary_color
+            line_color_normal:app.theme_cls.primary_color
+            text_color_focus:app.theme_cls.primary_color
+            text_color_normal:app.theme_cls.primary_color
 
-                    password:True
-                    icon_right:"lock"
-                    text_color:app.theme_cls.primary_color
-                    icon_right_color:app.theme_cls.primary_color
-                    icon_right_color_normal:app.theme_cls.primary_color
-                    icon_right_color_focus:app.theme_cls.primary_color
-                    helper_text_color_focus:app.theme_cls.primary_color
-                    helper_text_color_normal:app.theme_cls.primary_color
-                    line_color_focus:app.theme_cls.primary_color
-                    line_color_normal:app.theme_cls.primary_color
-                    text_color_focus:app.theme_cls.primary_color
-                    text_color_normal:app.theme_cls.primary_color
 
-                MDFillRoundFlatButton:
-                    text:"Entrar"
-                    md_bg_color:app.theme_cls.primary_color
-                    text_color:1,1,1,1
-                    font_size:25
-                    elevation:3
-                    pos_hint:{"center_x":0.5,"center_y":0.3}
-                    size_hint_x:0.8
-                    on_release:app.on_login_button_click(root.manager,Nome,Senha)
+        MDFillRoundFlatButton:
+            text:"Entrar"
+            md_bg_color:app.theme_cls.primary_color
+            text_color:1,1,1,1
+            font_size:25
+            elevation:3
+            pos_hint:{"center_x":0.7,"center_y":0.3}
+            size_hint_x:0.35
+            on_release:app.on_login_button_click(root.manager,Nome,Senha)
 
 
     MDFloatLayout:
@@ -133,7 +164,6 @@
             pos_hint:{"center_y":.97,"center_x":.98}
             color:1,1,1,1
             on_release:app.change_screen_right(root.manager,"ConfigLoginScreen")
-
 
 
 

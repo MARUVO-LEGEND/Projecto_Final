@@ -1,0 +1,139 @@
+<DoorMonitoramentScreen>
+    name:"DoorMonitoramentScreen"
+
+    MDBoxLayout:
+        md_bg_color:.1,.1,.1,1
+
+
+        orientation: "vertical"
+
+        MDTopAppBar:
+            elevation:0
+
+
+        MDBoxLayout:
+            orientation:"horizontal"
+            md_bg_color:.2,.2,.2,1
+            MDFloatLayout:
+
+
+
+
+                MDBoxLayout:
+                    orientation:"vertical"
+                    md_bg_color:.2,.2,.2,1
+                    MDFloatLayout:
+                        Image:
+                            id: camera_image
+                            source: "images/icon_camera.png"
+
+                            pos_hint:{"center_x":.5,"center_y":.5}
+
+
+
+                MDFillRoundFlatButton:
+                    text:"Iniciar Captura"
+                    id:button_cp
+                    md_bg_color:app.theme_cls.primary_color
+                    font_name:"fonts/static/Montserrat-Medium.ttf"
+                    size:(12,12)
+                    pos_hint:{"center_x":.5,"center_y":.1}
+                    on_touch_down:app.start_capture(camera_image,button_cp,)
+
+
+
+
+
+            MDBoxLayout:
+
+                MDCard:
+                    orientation:"vertical"
+                    padding:30
+                    MDBoxLayout:
+                        orientation:"horizontal"
+                        padding:30
+                        md_bg_color:.1,.1,.1,1
+                        radius:[20,20,20,20]
+                        MDBoxLayout:
+                            Image:
+
+                                source:"images/henry.jpeg"
+                        MDBoxLayout:
+                            orientation:"vertical"
+                            MDLabel:
+                                text:"Henri Canvill"
+                                font_size:40
+                                font_name:"fonts/static/Montserrat-SemiBold.ttf"
+                                pos_hint:{"center_x":0.6,"center_y":1}
+                            MDBoxLayout:
+                                MDLabel:
+                                    text:"Técnico Informatico"
+                                    font_size:20
+                                    font_name:"fonts/static/Montserrat-Medium.ttf"
+                                    pos_hint:{"center_x":0.8,"center_y":.8}
+                                    halign:"center"
+
+
+
+
+                    MDBoxLayout:
+                        padding:[120,30,0,0]
+                        orientation:"vertical"
+                        MDBoxLayout:
+                            orientation:"vertical"
+                            MDLabel:
+                                id:nome_aluno
+                                text:"Nome                  Henry Maruvado Canvil"
+                                font_size:30
+                                font_name:"fonts/static/Montserrat-Medium.ttf"
+                                halign:"left"
+                            MDLabel:
+                                id:turma_aluno
+                                text:"Turma                 TI11A"
+                                font_size:30
+                                font_name:"fonts/static/Montserrat-Medium.ttf"
+                                halign:"left"
+                            MDLabel:
+                                id:classe_aluno
+                                text:"Classe                    11ª"
+                                font_size:30
+                                font_name:"fonts/static/Montserrat-Medium.ttf"
+                                halign:"left"
+                            MDLabel:
+                                id:n_i_turma_aluno
+                                text:"Nº                           13"
+                                font_size:30
+                                font_name:"fonts/static/Montserrat-Light.ttf"
+                                halign:"left"
+
+
+
+
+
+
+    MDFloatLayout:
+        MDIconButton:
+            icon:"cog-outline"
+            pos_hint:{"center_y":.97,"center_x":.96}
+            color:1,1,1,1
+            on_release:app.change_screen_right(root.manager,"ConfigMonitoramentScreen")
+
+
+
+
+
+        MDLabel:
+            text:"MAGNA"
+            font_name:"fonts/static/Montserrat-Light.ttf"
+            font_size:50
+            size_hint_y: None
+            pos_hint:{"center_x":0.5,"center_y":.95}
+
+            halign:"center"
+
+
+
+
+
+
+

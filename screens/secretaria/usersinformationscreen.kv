@@ -1,12 +1,14 @@
 <UsersInformationScreen>:
     on_pre_enter:app.list_of_alunos(Lista_alunos)
 
+
+
     name:"UsersInformationScreen"
     MDBoxLayout:
         orientation:"vertical"
         MDTopAppBar:
             md_bg_color:app.theme_cls.primary_color
-            title:"MAGNA"
+
             id:"menu"
             left_action_items: [["arrow-left", lambda x: app.change_screen_left(root.manager,"ChoiceScreen")]]
 
@@ -14,11 +16,13 @@
 
 
         MDTextField:
-            hint_text:"ID"
+            id:search_container
+            hint_text:"Pequisar Aluno"
             helper_text:"Digite o ID do Aluno"
             helper_text_mode:"on_focus"
-            icon_right: "magnify"  # Ícone de pesquisa à direita
             mode:"rectangle"
+
+
 
         MDBoxLayout:
             padding:20
@@ -32,8 +36,31 @@
     MDFloatLayout:
         MDIconButton:
             icon:"cog-outline"
-            pos_hint:{"center_y":.98,"center_x":.98}
+            pos_hint:{"center_y":.95,"center_x":.975}
             color:1,1,1,1
             on_release:app.change_screen_right(root.manager,"ConfigUsersInformationScreen")
 
+
+        MDIconButton:
+            icon:"reload"
+            pos_hint:{"center_y":.66,"center_x":.92}
+            color:1,1,1,1
+            on_release:app.update_row_datatable()
+
+        MDLabel:
+            text:"MAGNA"
+            font_name:"fonts/static/Montserrat-Light.ttf"
+            font_size:50
+            size_hint_y: None
+            pos_hint:{"center_x":0.5,"center_y":.95}
+
+            halign:"center"
+
+
+    MDFloatLayout:
+        MDIconButton:
+            icon:"magnify"
+            pos_hint:{"center_y":.84,"center_x":.975}
+            background_color:1,0,0,1
+            on_release:app.search_aluno(search_container.text)
 

@@ -1,48 +1,51 @@
-from kivy.metrics import dp
-
+from kivy.lang import Builder
 from kivymd.app import MDApp
-from kivymd.uix.datatables import MDDataTable
-from kivymd.uix.floatlayout import MDFloatLayout
-from kivymd.uix.button import MDRaisedButton
+from kivymd.uix.menu import MDDropdownMenu
 
+KV = '''
+BoxLayout:
+    orientation: 'vertical'
+    padding: "10dp"
 
-class Example(MDApp):
-    data_tables = None
+    MDTextField:
+        id: text_field1
+        hint_text: "Selecione uma opção"
+        on_focus: if self.focus: app.show_menu1()
 
+    MDTextField:
+        id: text_field2
+        hint_text: "Selecione outra opção"
+        on_focus: if self.focus: app.show_menu2()
+'''
+
+class TestApp(MDApp):
     def build(self):
-        self.theme_cls.theme_style = "Dark"
-        self.theme_cls.primary_palette = "Orange"
+        return Builder.load_string(KV)
 
-        layout = MDFloatLayout()
-        layout.add_widget(
-            MDRaisedButton(
-                text="Change 2 row",
-                pos_hint={"center_x": 0.5},
-                on_release=self.update_row,
-                y=24,
-            )
-        )
-        self.data_tables = MDDataTable(
-            pos_hint={"center_y": 0.5, "center_x": 0.5},
-            size_hint=(0.9, 0.6),
-            use_pagination=False,
-            column_data=[
-                ("No.", dp(30)),
-                ("Column 1", dp(40)),
-                ("Column 2", dp(40)),
-                ("Column 3", dp(40)),
-            ],
-            row_data=[(f"{i + 1}", "1", "2", "3") for i in range(3)],
-        )
-        layout.add_widget(self.data_tables)
+    def show_menu1(self):
+        menu_items = [
+            {"text": "Opção 1", "viewclass": "OneLineListItem", "on_release": lambda x="Opção 1": self.select_option(x, 1)},
+            {"text": "Opção 2", "viewclass": "OneLineListItem", "on_release": lambda x="Opção 2": self.select_option(x, 1)},
+            {"text": "Opção 3", "viewclass": "OneLineListItem", "on_release": lambda x="Opção 3": self.select_option(x, 1)},
+        ]
+        self.menu1 = MDDropdownMenu(items=menu_items, width_mult=4)
+        self.menu1.open()
 
-        return layout
+    def show_menu2(self):
+        menu_items = [
+            {"text": "Opção A", "viewclass": "OneLineListItem", "on_release": lambda x="Opção A": self.select_option(x, 2)},
+            {"text": "Opção B", "viewclass": "OneLineListItem", "on_release": lambda x="Opção B": self.select_option(x, 2)},
+            {"text": "Opção C", "viewclass": "OneLineListItem", "on_release": lambda x="Opção C": self.select_option(x, 2)},
+        ]
+        self.menu2 = MDDropdownMenu(items=menu_items, width_mult=4)
+        self.menu2.open()
 
-    def update_row(self, instance_button: MDRaisedButton) -> None:
-        self.data_tables.update_row(
-            self.data_tables.row_data[0],  # old row data
-            ["2", "A", "B", "C"],          # new row data
-        )
+    def select_option(self, text, field_id):
+        if field_id == 1:
+            self.root.ids.text_field1.text = text
+            self.menu1.dismiss()
+        elif field_id == 2:
+            self.root.ids.text_field2.text = text
+            self.menu2.dismiss()
 
-
-Example().run()
+TestApp().run()

@@ -1,25 +1,36 @@
 <AboutAppScreen>:
     name:"AboutAppScreen"
 
-    MDFloatLayout:
-        MDIconButton:
 
-            icon:"arrow-right"
-            pos_hint:{"right":True,"top":True}
-            on_release:
-                root.manager.transition.direction="left"
-                root.manager.current="LoginScreen"
+
+    MDFloatLayout:
+        canvas.before:
+            Color:
+                rgba: 0.1, .1, .1, 1
+            Rectangle:
+                size: self.size
+                pos: self.pos
+
+
+        ParticleMesh2:
+            canvas:
+                Color:
+                    rgba: 1, 1, 1, 1
+                Point:
+                    points: self.points
+                    pointsize: 2
+
 
 
     MDBoxLayout:
         padding:50
-        md_bg_color:0,0,0,0
+        md_bg_color:.1,.1,.1,0.5
 
 
 
         MDScrollView:
             radius:[20, 20, 20, 20]
-            md_bg_color:1,1,1,0
+            md_bg_color:.1,.1,.1,0
 
 
             MDGridLayout:
@@ -172,3 +183,12 @@
 
 
 
+
+    MDFloatLayout:
+        MDIconButton:
+
+            icon:"arrow-right"
+            pos_hint:{"right":True,"top":True}
+            on_release:
+                root.manager.transition.direction="left"
+                root.manager.current="LoginScreen"

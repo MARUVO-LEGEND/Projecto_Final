@@ -1,6 +1,6 @@
 from kivymd.uix.screen import MDScreen
 
-class MonitoramentScreen(MDScreen):
+class DoorMonitoramentScreen(MDScreen):
     pass
 
 
