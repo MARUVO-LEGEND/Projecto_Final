@@ -48,9 +48,10 @@ class LiveApp(MDApp, App):
         os.path.join(os.getcwd(), "screens/admin/editfuncionarioinformationscreen.kv"),
         os.path.join(os.getcwd(), "screens/configuration/configloginscreen.kv"),
         os.path.join(os.getcwd(), "screens/configuration/configsigninscreen.kv"),
-        os.path.join(os.getcwd(), "screens/configuration/configmonitoramentscreen.kv"),
+        os.path.join(os.getcwd(), "screens/configuration/configdoormonitoramentscreen.kv"),
         os.path.join(os.getcwd(), "screens/configuration/configusersinformationscreen.kv"),
         os.path.join(os.getcwd(), "screens/configuration/configedituserinformationscreen.kv"),
+        os.path.join(os.getcwd(), "screens/configuration/configschoolmoniotarmentscreen.kv"),
         os.path.join(os.getcwd(), "screens/secretaria/edituserinformationscreen.kv"),
     }
     # class to watch from *.py files
@@ -67,7 +68,8 @@ class LiveApp(MDApp, App):
         "EditFuncionarioInformationScreen": "screens.admin.editfuncionarioinformationscreen",
         "SchoolMonitoramentScreen": "screens.monitorament.schoolmonitoramentscreen",
         "ConfigLoginScreen": "screens.configuration.configloginscreen",
-        "ConfigMonitoramentScreen": "screens.configuration.configmonitoramentscreen",
+        "ConfigDoorMonitoramentScreen": "screens.configuration.configdoormonitoramentscreen",
+        "ConfigSchoolMonitoramentScreen": "screens.configuration.configschoolmonitoramentscreen",
         "ConfigSignInScreen": "screens.configuration.configsigninscreen",
         "ConfigUsersInformationScreen": "screens.configuration.configusersinformationscreen",
         "ConfigEditUserInformationScreen": "screens.configuration.configedituserinformationscreen",
@@ -399,7 +401,7 @@ class LiveApp(MDApp, App):
         id_convert=self.id_edit_user.split(" ")
 
         if self.função_adm=="Secretaria":
-            id = int(id_convert[-2])
+            id = int(id_convert[1])
             try:
                 cursor = conn.cursor()
                 sql = f'UPDATE secretario set nome="{str(nome)}",id_funcionario={int(n_id)},senha={str(senha)},telefone="{str(telefone)}" where id_secretario={id}'
@@ -412,7 +414,7 @@ class LiveApp(MDApp, App):
             except mysql.connector.Error as err:
                 print(f"Erro ao atualizar usuário: {err}")
         if self.função_adm=="Portaria":
-            id = int(id_convert[-3])
+            id = int(id_convert[1])
             try:
                 cursor = conn.cursor()
                 sql = f'UPDATE porteiro set nome="{str(nome)}",id_funcionario={int(n_id)},senha={str(senha)},telefone="{str(telefone)}" where id_porteiro={id}'
@@ -426,7 +428,7 @@ class LiveApp(MDApp, App):
                 print(f"Erro ao atualizar usuário: {err}")
 
         if self.função_adm=="Monitoração":
-            id = int(id_convert[-4])
+            id = int(id_convert[1])
             try:
                 cursor = conn.cursor()
                 sql = f'UPDATE monitor set nome="{str(nome)}",senha="{str(senha)}",telefone="{str(telefone)}",id_funcionario={int(n_id)} where id_monitor={id}'
@@ -707,7 +709,7 @@ class LiveApp(MDApp, App):
             nome = f"{nome_convertido[0]} {nome_convertido[-1]}"
             n_telefone = funcionario["telefone"]
             id_funcionario = funcionario["id_funcionario"]
-            linha_funcionario = [" ", "Secretaria", ("information", [1, 1, 1, 1], f"  {id} "), nome, n_telefone,
+            linha_funcionario = [" ", "Secretaria", ("information", [1, 1, 1, 1], f" {id}"), nome, n_telefone,
                                  id_funcionario]
             self.data_table_adm.row_data.append(linha_funcionario)
         for funcionario in self.porteiros:
@@ -717,7 +719,7 @@ class LiveApp(MDApp, App):
             nome = f"{nome_convertido[0]} {nome_convertido[-1]}"
             n_telefone = funcionario["telefone"]
             id_funcionario = funcionario["id_funcionario"]
-            linha_funcionario = [" ", "Portaria", ("information", [1, 1, 1, 1], f"  {id}  "), nome, n_telefone,
+            linha_funcionario = [" ", "Portaria", ("information", [1, 1, 1, 1], f" {id} "), nome, n_telefone,
                                  id_funcionario]
             self.data_table_adm.row_data.append(linha_funcionario)
         for funcionario in self.monitores:
@@ -727,7 +729,7 @@ class LiveApp(MDApp, App):
             nome = f"{nome_convertido[0]} {nome_convertido[-1]}"
             n_telefone = funcionario["telefone"]
             id_funcionario = funcionario["id_funcionario"]
-            linha_funcionario = [" ", "Monitorização", ("information", [1, 1, 1, 1], f"  {id}   "), nome,
+            linha_funcionario = [" ", "Monitorização", ("information", [1, 1, 1, 1], f" {id}  "), nome,
                                  n_telefone, id_funcionario]
             self.data_table_adm.row_data.append(linha_funcionario)
     def convert_name_to_file(self,nome,id_esc):
@@ -921,6 +923,7 @@ class LiveApp(MDApp, App):
                 if arg=="Secretaria":
                     for arg in args:
                         if arg!="Secretaria":
+
                             func_id=int(arg)
                             funcionario=self.secretarios[func_id-1]
                             self.Nome_edit_adm.text=f"{funcionario['nome']}"
@@ -1062,13 +1065,13 @@ class LiveApp(MDApp, App):
 
         print(len(instance_row.text))
         self.id_edit_user = instance_row.text
-        if instance_row.selected and len(instance_row.text)==4:
+        if len(instance_row.text)==2:
             self.show_dialog_adm(self.id_edit_user,"Secretaria")
             print("Executado")
-        elif instance_row.selected and len(instance_row.text)==5:
+        elif len(instance_row.text)==3:
             self.show_dialog_adm(self.id_edit_user,"Portaria")
             print("Executado")
-        elif instance_row.selected and len(instance_row.text)==5:
+        elif len(instance_row.text)==4:
             self.show_dialog_adm(self.id_edit_user,"Monitoração")
             print("Executado")
 
@@ -1182,7 +1185,7 @@ class LiveApp(MDApp, App):
                     nome = f"{nome_convertido[0]} {nome_convertido[-1]}"
                     n_telefone = funcionario["telefone"]
                     id_funcionario = funcionario["id_funcionario"]
-                    linha_funcionario = [" ","Secretaria", ("information", [1, 1, 1, 1], f"  {id} "), nome, n_telefone, id_funcionario ]
+                    linha_funcionario = [" ","Secretaria", ("information", [1, 1, 1, 1], f" {id}"), nome, n_telefone, id_funcionario ]
                     self.data_table_adm.row_data.append(linha_funcionario)
                 for funcionario in self.porteiros:
 
@@ -1192,7 +1195,7 @@ class LiveApp(MDApp, App):
                     nome = f"{nome_convertido[0]} {nome_convertido[-1]}"
                     n_telefone = funcionario["telefone"]
                     id_funcionario = funcionario["id_funcionario"]
-                    linha_funcionario = [" ","Portaria" ,("information", [1, 1, 1, 1], f"  {id}  "), nome, n_telefone, id_funcionario ]
+                    linha_funcionario = [" ","Portaria" ,("information", [1, 1, 1, 1], f" {id} "), nome, n_telefone, id_funcionario ]
                     self.data_table_adm.row_data.append(linha_funcionario)
                 for funcionario in self.monitores:
 
@@ -1202,7 +1205,7 @@ class LiveApp(MDApp, App):
                     nome = f"{nome_convertido[0]} {nome_convertido[-1]}"
                     n_telefone = funcionario["telefone"]
                     id_funcionario = funcionario["id_funcionario"]
-                    linha_funcionario = [" ","Monitorização" ,("information", [1, 1, 1, 1], f"  {id}   "), nome, n_telefone, id_funcionario ]
+                    linha_funcionario = [" ","Monitorização" ,("information", [1, 1, 1, 1], f" {id}  "), nome, n_telefone, id_funcionario ]
                     self.data_table_adm.row_data.append(linha_funcionario)
 
                 self.executatar_funcao_once = True

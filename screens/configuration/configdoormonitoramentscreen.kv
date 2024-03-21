@@ -1,6 +1,5 @@
-<ConfigMonitoramentScreen>
-    name:"ConfigMonitoramentScreen"
-
+<ConfigDoorMonitoramentScreen>:
+    name:"ConfigDoorMonitoramentScreen"
     MDBoxLayout:
 
         padding:100
@@ -10,8 +9,7 @@
             theme_text_color:"Primary"
             pos_hint:{"center_y":.97,"center_x":.98}
             on_release:
-                app.change_screen_left(root.manager,"MonitoramentScreen")
-
+                app.change_screen_left(root.manager,"DoorMonitoramentScreen")
         MDBoxLayout:
             radius:[20,20,20,20]
             md_bg_color:app.theme_cls.primary_color
@@ -36,7 +34,6 @@
                         font_name:"fonts/static/Montserrat-Medium.ttf"
                         font_size:20
                         pos_hint:{"center_x":.98,"center_y":.20}
-
                     MDCard:
                         md_bg_color:.1,.1,.1,1
                         radius:[20,20,20,20]
@@ -77,6 +74,9 @@
                                 pos_hint:{"center_x":.80 ,"center_y":.5}
                                 on_release:
                                     app.theme_blue()
+
+
+
     MDFloatLayout:
         MDIconButton:
             text:"Logout"

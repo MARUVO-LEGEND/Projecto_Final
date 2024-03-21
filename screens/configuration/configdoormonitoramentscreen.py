@@ -1,5 +1,5 @@
 from kivymd.uix.screen import MDScreen
 
-class ConfigMonitoramentScreen(MDScreen):
+class ConfigDoorMonitoramentScreen(MDScreen):
     pass
 

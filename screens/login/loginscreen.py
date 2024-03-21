@@ -21,7 +21,7 @@ class ParticleMesh(Widget):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.direction = []
-        self.point_number = 70
+        self.point_number = 80
         Clock.schedule_once(lambda dt: self.plot_points(), 6)
 
     def verificador(self,root):
