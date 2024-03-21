@@ -1,0 +1,85 @@
+<EditFuncionarioInformationScreen>
+    name:"EditFuncionarioInformationScreen"
+    on_pre_enter:app.save_edit_widgets_adm(Nome,Senha,Telefone,N_id)
+    MDBoxLayout:
+        orientation:"vertical"
+        MDTopAppBar:
+            md_bg_color:app.theme_cls.primary_color
+            id:"menu"
+            left_action_items: [["arrow-left", lambda x: app.change_screen_left(root.manager,"AdminScreen")]]
+        MDBoxLayout:
+            orientation:"horizontal"
+            padding:100
+            MDBoxLayout:
+
+
+                radius:20
+
+                md_bg_color:.1,.1,.1,1
+                MDCard:
+                    padding:30
+                    elevation:4
+                    MDFloatLayout:
+                        spacing:35
+                        orientation:"vertical"
+                        MDLabel:
+                            text:"Digite os Dados"
+                            font_name:"fonts/static/Montserrat-Bold.ttf"
+                            pos_hint:{"center_y":.97,"center_x":.935}
+                        MDTextField:
+                            id:Nome
+                            hint_text:"Nome"
+                            helper_text: "Digite o Nome Completo"
+                            helper_text_mode: "on_focus"
+                            size_hint_x:.8
+                            pos_hint:{"center_y":.75,"center_x":.5}
+                            mode:"fill"
+                            required:True
+                        MDTextField:
+                            id:Senha
+                            hint_text:"Senha"
+                            helper_text:"Digite a Senha"
+                            helper_text_mode:"on_focus"
+                            pos_hint:{"center_y":.5,"center_x":.225}
+                            size_hint_x:.25
+                            mode:"fill"
+                            required:True
+                        MDTextField:
+                            id:Telefone
+                            hint_text:"Telefone"
+                            helper_text:"999 999 999"
+                            helper_text_mode:"on_focus"
+                            pos_hint:{"center_y":.5,"center_x":.5}
+                            size_hint_x:.25
+                            max_text_length: 11
+                            mode:"fill"
+                            required:True
+                        MDTextField:
+                            id:N_id
+                            hint_text:"Nº Id"
+                            helper_text:"12345"
+                            helper_text_mode:"on_focus"
+                            pos_hint:{"center_y":.5,"center_x":.775}
+                            max_text_length: 5
+
+                            size_hint_x:.25
+                            mode:"fill"
+                            required:True
+                        MDFillRoundFlatButton:
+                            text:"Editar Dados"
+                            md_bg_color:app.theme_cls.primary_color
+                            pos_hint:{"center_y":.1,"center_x":.5}
+                            size_hint_y:.15
+                            size_hint_x:.2
+                            font_size:25
+                            font_name:"fonts/static/Montserrat-Medium.ttf"
+                            on_release:app.user_edit_send_adm(Nome.text,Senha.text,Telefone.text,N_id.text)
+    MDFloatLayout:
+        MDLabel:
+            text:"MAGNA"
+            font_name:"fonts/static/Montserrat-Light.ttf"
+            font_size:50
+            size_hint_y: None
+            pos_hint:{"center_x":0.5,"center_y":.95}
+
+            halign:"center"
