@@ -15,30 +15,24 @@
             orientation:"horizontal"
             md_bg_color:.2,.2,.2,1
             MDBoxLayout:
+                orientation:"vertical"
+                md_bg_color:.2,.2,.2,1
+
+                MDFloatLayout:
+                    Image:
+                        id: camera_image
+                        source: "images/icon_camera.png"
+                        pos_hint:{"center_x":.5,"center_y":.5}
 
 
-
-
-                MDBoxLayout:
-                    orientation:"vertical"
-                    md_bg_color:.2,.2,.2,1
-                    MDBoxLayout:
-                        MDFloatLayout:
-                            Image:
-                                id: camera_image
-                                source: "images/icon_camera.png"
-
-                                pos_hint:{"center_x":.5,"center_y":.5}
-
-
-
-                            MDFillRoundFlatButton:
-                                text:"Iniciar Captura"
-                                id:button_cp
-                                md_bg_color:app.theme_cls.primary_color
-                                font_name:"fonts/static/Montserrat-Medium.ttf"
-                                pos_hint:{"center_x":.5,"center_y":.1}
-                                on_touch_down:app.start_capture(camera_image,button_cp,)
+                MDFloatLayout:
+                    MDFillRoundFlatButton:
+                        text:"Iniciar Captura"
+                        id:button_cp
+                        md_bg_color:app.theme_cls.primary_color
+                        font_name:"fonts/static/Montserrat-Medium.ttf"
+                        pos_hint:{"center_x":.5,"center_y":.1}
+                        on_touch_down:app.start_capture(camera_image,button_cp,)
 
 
 

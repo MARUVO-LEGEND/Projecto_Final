@@ -1,51 +1,72 @@
-from kivy.lang import Builder
-from kivymd.app import MDApp
-from kivymd.uix.menu import MDDropdownMenu
+import face_recognition
+import cv2
+import numpy as np
+import os
 
-KV = '''
-BoxLayout:
-    orientation: 'vertical'
-    padding: "10dp"
+# Função para carregar as imagens da pasta e seus respectivos nomes
+def carregar_imagens_pasta(pasta):
+    imagens_conhecidas = []
+    nomes = []
 
-    MDTextField:
-        id: text_field1
-        hint_text: "Selecione uma opção"
-        on_focus: if self.focus: app.show_menu1()
+    for nome_arquivo in os.listdir(pasta):
+        nome, extensao = os.path.splitext(nome_arquivo)
+        if extensao in ['.jpg', '.png']:
+            imagem = face_recognition.load_image_file(os.path.join(pasta, nome_arquivo))
+            encoding = face_recognition.face_encodings(imagem)[0]
+            imagens_conhecidas.append(encoding)
+            nomes.append(nome)
 
-    MDTextField:
-        id: text_field2
-        hint_text: "Selecione outra opção"
-        on_focus: if self.focus: app.show_menu2()
-'''
+    return imagens_conhecidas, nomes
 
-class TestApp(MDApp):
-    def build(self):
-        return Builder.load_string(KV)
+# Pasta onde as imagens das faces conhecidas estão localizadas
+pasta_faces_conhecidas = 'codigo_mario/source_code/images'
 
-    def show_menu1(self):
-        menu_items = [
-            {"text": "Opção 1", "viewclass": "OneLineListItem", "on_release": lambda x="Opção 1": self.select_option(x, 1)},
-            {"text": "Opção 2", "viewclass": "OneLineListItem", "on_release": lambda x="Opção 2": self.select_option(x, 1)},
-            {"text": "Opção 3", "viewclass": "OneLineListItem", "on_release": lambda x="Opção 3": self.select_option(x, 1)},
-        ]
-        self.menu1 = MDDropdownMenu(items=menu_items, width_mult=4)
-        self.menu1.open()
+# Carregar as imagens e nomes das faces conhecidas
+faces_conhecidas, nomes_conhecidos = carregar_imagens_pasta(pasta_faces_conhecidas)
 
-    def show_menu2(self):
-        menu_items = [
-            {"text": "Opção A", "viewclass": "OneLineListItem", "on_release": lambda x="Opção A": self.select_option(x, 2)},
-            {"text": "Opção B", "viewclass": "OneLineListItem", "on_release": lambda x="Opção B": self.select_option(x, 2)},
-            {"text": "Opção C", "viewclass": "OneLineListItem", "on_release": lambda x="Opção C": self.select_option(x, 2)},
-        ]
-        self.menu2 = MDDropdownMenu(items=menu_items, width_mult=4)
-        self.menu2.open()
+# Inicializar a webcam
+video_capture = cv2.VideoCapture(0)
 
-    def select_option(self, text, field_id):
-        if field_id == 1:
-            self.root.ids.text_field1.text = text
-            self.menu1.dismiss()
-        elif field_id == 2:
-            self.root.ids.text_field2.text = text
-            self.menu2.dismiss()
+while True:
+    # Capturar o quadro da webcam
+    ret, frame = video_capture.read()
 
-TestApp().run()
+    # Converter o quadro de BGR (OpenCV) para RGB (face_recognition)
+    rgb_frame = frame[:, :, ::-1]
+
+    # Encontrar as localizações das faces na imagem capturada
+    face_locations = face_recognition.face_locations(rgb_frame)
+
+    # Percorrer cada localização de face encontrada na imagem capturada
+    for face_location in face_locations:
+        # Recortar a face da imagem capturada
+        top, right, bottom, left = face_location
+        face_image = rgb_frame[top:bottom, left:right]
+
+        # Codificar a face recortada
+        face_encoding =face_image
+
+        # Comparar a face encontrada com as faces conhecidas
+        matches = face_recognition.compare_faces(faces_conhecidas, face_encoding)
+
+        # Verificar se alguma face conhecida corresponde à face encontrada
+        nome_encontrado = "Desconhecido"
+        if True in matches:
+            index = matches.index(True)
+            nome_encontrado = nomes_conhecidos[index]
+
+        # Desenhar um retângulo em torno da face e mostrar o nome
+        cv2.rectangle(frame, (left, top), (right, bottom), (0, 255, 0), 2)
+        font = cv2.FONT_HERSHEY_DUPLEX
+        cv2.putText(frame, nome_encontrado, (left + 6, bottom - 6), font, 0.5, (255, 255, 255), 1)
+
+    # Mostrar o quadro resultante
+    cv2.imshow('Video', frame)
+
+    # Se pressionar 'q', sair do loop
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+
+# Liberar a captura da webcam e fechar todas as janelas
+video_capture.release()
+cv2.destroyAllWindows()
