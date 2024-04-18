@@ -2,7 +2,6 @@
     name:"DoorMonitoramentScreen"
 
     MDBoxLayout:
-        md_bg_color:.1,.1,.1,1
 
 
         orientation: "vertical"
@@ -13,26 +12,36 @@
 
         MDBoxLayout:
             orientation:"horizontal"
-            md_bg_color:.2,.2,.2,1
             MDBoxLayout:
-                orientation:"vertical"
-                md_bg_color:.2,.2,.2,1
-
-                MDFloatLayout:
-                    Image:
-                        id: camera_image
-                        source: "images/icon_camera.png"
-                        pos_hint:{"center_x":.5,"center_y":.5}
 
 
-                MDFloatLayout:
-                    MDFillRoundFlatButton:
-                        text:"Iniciar Captura"
-                        id:button_cp
-                        md_bg_color:app.theme_cls.primary_color
-                        font_name:"fonts/static/Montserrat-Medium.ttf"
-                        pos_hint:{"center_x":.5,"center_y":.1}
-                        on_touch_down:app.start_capture(camera_image,button_cp,)
+
+
+                MDBoxLayout:
+                    orientation:"vertical"
+                    MDBoxLayout:
+                        MDFloatLayout:
+                            MDCard:
+                                md_bg_color:.3,.3,.3,1
+                                size_hint_y:.5
+                                size_hint_x:.5
+                                pos_hint:{"center_x":.5,"center_y":.5}
+                            Image:
+                                id: camera_image
+                                md_bg_color:.5,.5,.5,1
+                                source: "images/icon_camera.png"
+
+                                pos_hint:{"center_x":.5,"center_y":.5}
+
+
+
+                            MDFillRoundFlatButton:
+                                text:"Iniciar Captura"
+                                id:button_cp
+                                md_bg_color:app.theme_cls.primary_color
+                                font_name:"fonts/static/Montserrat-Medium.ttf"
+                                pos_hint:{"center_x":.5,"center_y":.1}
+                                on_release:app.start_capture(camera_image,button_cp,label_nome_h1,label_curso_h1,nome_aluno,turma_aluno,classe_aluno,n_i_turma_aluno,permicao_entrada,image_aluno)
 
 
 
@@ -42,25 +51,29 @@
 
                 MDCard:
                     orientation:"vertical"
+                    md_bg_color:.3,.3,.3,1
+                    radius:[0,0,0,0]
                     padding:30
                     MDBoxLayout:
                         orientation:"horizontal"
                         padding:30
-                        md_bg_color:.1,.1,.1,1
+                        md_bg_color:app.theme_cls.primary_color
                         radius:[20,20,20,20]
                         MDBoxLayout:
                             Image:
-
+                                id:image_aluno
                                 source:"images/henry.jpeg"
                         MDBoxLayout:
                             orientation:"vertical"
                             MDLabel:
+                                id:label_nome_h1
                                 text:"Henri Canvill"
                                 font_size:40
                                 font_name:"fonts/static/Montserrat-SemiBold.ttf"
                                 pos_hint:{"center_x":0.6,"center_y":1}
                             MDBoxLayout:
                                 MDLabel:
+                                    id:label_curso_h1
                                     text:"Técnico Informatico"
                                     font_size:20
                                     font_name:"fonts/static/Montserrat-Medium.ttf"
@@ -78,26 +91,33 @@
                             MDLabel:
                                 id:nome_aluno
                                 text:"Nome                  Henry Maruvado Canvil"
-                                font_size:30
+                                font_size:20
                                 font_name:"fonts/static/Montserrat-Medium.ttf"
+                                adaptive:True
                                 halign:"left"
                             MDLabel:
                                 id:turma_aluno
                                 text:"Turma                 TI11A"
-                                font_size:30
+                                font_size:20
                                 font_name:"fonts/static/Montserrat-Medium.ttf"
                                 halign:"left"
                             MDLabel:
                                 id:classe_aluno
                                 text:"Classe                    11ª"
-                                font_size:30
+                                font_size:20
                                 font_name:"fonts/static/Montserrat-Medium.ttf"
                                 halign:"left"
                             MDLabel:
                                 id:n_i_turma_aluno
                                 text:"Nº                           13"
-                                font_size:30
-                                font_name:"fonts/static/Montserrat-Light.ttf"
+                                font_size:20
+                                font_name:"fonts/static/Montserrat-Medium.ttf"
+                                halign:"left"
+                            MDLabel:
+                                id:permicao_entrada
+                                text:"Permição                           Autorizada"
+                                font_size:20
+                                font_name:"fonts/static/Montserrat-Medium.ttf"
                                 halign:"left"
 
 

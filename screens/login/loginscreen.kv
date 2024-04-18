@@ -2,7 +2,6 @@
 <LoginScreen>:
     name:"LoginScreen"
     on_leave: app.verificador_de_animacao(root.manager,container)
-    on_enter:
 
 
 
@@ -10,8 +9,9 @@
         id:container
 
         canvas.before:
+
             Color:
-                rgba: 0.1, .1, .1, 1
+                rgba: 0.1, .1, .1, 0
             Rectangle:
                 size: self.size
                 pos: self.pos
@@ -162,7 +162,8 @@
         MDIconButton:
             icon:"cog-outline"
             pos_hint:{"center_y":.97,"center_x":.98}
-            color:1,1,1,1
+            theme_text_color:"Custom"
+            text_color:.5,.5,.5,1
             on_release:app.change_screen_right(root.manager,"ConfigLoginScreen")
 
 

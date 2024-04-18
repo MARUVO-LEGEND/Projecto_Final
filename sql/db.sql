@@ -9,7 +9,8 @@ create table aluno(
     foto_caminho varchar(100)  unique, 
     turma varchar(10),
     nascimento date,
-    turno varchar(5)
+    turno varchar(5),
+    mes_propina_paga varchar(10)
 );
 
 create table administrador(

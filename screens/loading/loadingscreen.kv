@@ -1,6 +1,6 @@
 <LoadingScreen>:
     name:"LoadingScreen"
-
+    on_pre_enter:app.verificador_tema_label(titulo)
 
 
     BoxLayout:
@@ -10,8 +10,13 @@
         MDFloatLayout:
 
             MDLabel:
+                id:titulo
                 text:"MAGNA"
                 font_name:"fonts/static/Montserrat-Light.ttf"
+                theme_text_color:"Custom"
+                markup:True
+                text_color:1,1,1,1
+
                 pos_hint:{"center_x":.90,"center_y":0.5}
                 font_size:70
 

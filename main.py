@@ -1,6 +1,7 @@
 import os
 import re
 import glob
+import  PIL
 import numpy as np
 import face_recognition
 from unidecode import unidecode
@@ -97,7 +98,7 @@ class LiveApp(MDApp, App):
         self.alunos=[]
 
         # CAMINHO DAS IMAGENS DA FACE DOS ALUNOS
-        self.caminho_imagem_faces_alunos=r"C:\Users\venic\Programation\PycharmProjects\Project Final Course\Projecto_Final\faces_alunos"
+        self.caminho_imagem_faces_alunos=r"C:\Users\josem\OneDrive\Ambiente de Trabalho\Projecto_Final\faces_alunos"
 
         #VARIAVEIS ONDE SERÃO ARMAZENADAS OS TEXTFIELD DA SCREEN EDITUSERINFORMATIONSCREEN
         self.Nome_edit=None
@@ -116,6 +117,8 @@ class LiveApp(MDApp, App):
         #VARIAVEIS PARA AUXILIAR NO CODIGO
         #bool que ira informar se a função list_of_alunos já foi executada uma vez
         self.executatar_funcao_once=False
+        self.executatar_funcao_once_adm=False
+
         #
         self.edit_image=False
         # variavel que ira armazenar o valor da linea clicada na função on_row_press
@@ -133,27 +136,52 @@ class LiveApp(MDApp, App):
         self.executar_verificador=False
         self.executar_verificador_n=1
 
+        self.tipo_tema = 0 # dark==0 | light=1
+
 
         self.função_sign_in=""
 
         return Factory.MainScreenManager()
 
     # MUDAR TEMA DA APP
-    def theme_dark(self):
-
+    def theme_change(self, icon):
         self.theme_cls.primary_palette = (
             "Blue" if self.theme_cls.primary_palette == "LightBlue" else "LightBlue"
         )
-        self.theme_cls.theme_style = (
-            "Dark" if self.theme_cls.theme_style == "Light" else "Light"
-        )
+
+        if self.theme_cls.theme_style == "Light":
+            self.theme_cls.theme_style = "Dark"
+            self.tipo_tema = 0
+
+        elif self.theme_cls.theme_style == "Dark":
+            self.theme_cls.theme_style = "Light"
+            self.tipo_tema = 1
+
+        print(self.tipo_tema)
+
+        icon.theme_text_color = "Custom"
+        icon.md_bg_color = [0.1, 0.1, 0.1, 1] if icon.md_bg_color == [.9, .9, .9, 1] else [.9, .9, .9, 1]
+        icon.text_color = [0.1, 0.1, 0.1, 1] if icon.text_color == [.9, .9, .9, 1] else [.9, .9, .9, 1]
 
         if self.theme_cls.primary_palette == "Blue":
             self.primary_theme.primary_hue = "600"
         else:
             self.theme_cls.primary_hue = "800"
+
+    def verificador_tema_label(self, label,fundo1,fundo2):
+        print(self.tipo_tema)
+        label.theme_text_color = "Custom"
+        if self.tipo_tema == 1:
+            print("exe")
+            label.text_color = (0, 0, 0, 1)
+            if fundo1:
+                fundo1.md_bg_color=(0.2, 0.2, 0.2, 1)
+        elif self.tipo_tema == 0:
+            print("exe")
+            label.text_color = (1, 1, 1, 1)
+
     def theme_orange(self):
-        self.theme_cls.primary_palette = "Orange"
+        self.theme_cls.primary_palette    = "Orange"
         self.primary_theme.primary_hue = "600"
     def theme_blue(self):
         self.theme_cls.primary_palette = "Blue"
@@ -172,7 +200,7 @@ class LiveApp(MDApp, App):
             {
                 "text": f"{função[i]}",
                 "viewclass": "OneLineListItem",
-                "on_release": lambda x=f"{função[i]}":self.menu_callback(x,menu,container_text),
+                "on_release": lambda x=f"{função[i]}":self.menu_callback_adm(x,menu,container_text),
             } for i in range(3)
         ]
         menu = MDDropdownMenu(
@@ -183,25 +211,55 @@ class LiveApp(MDApp, App):
             width_mult=4,
         )
         menu.open()
-    def menu_callback(self, text_item,menu,c_text):
+    def open_menu_signin(self,container_dropdown):
+
+
+        função=["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"]
+        menu_items = [
+            {
+                "text": f"{função[i]}",
+                "viewclass": "OneLineListItem",
+                "on_release": lambda x=f"{função[i]}":self.menu_callback(x,menu,month),
+            } for i in range(3)
+        ]
+        menu = MDDropdownMenu(
+            caller=container_dropdown,
+            ver_growth="up",
+            radius=[20, 20, 20, 20],
+            items=menu_items,
+            width_mult=4,
+        )
+        menu.open()
+    def menu_callback_adm(self, text_item,menu,c_text):
         menu.dismiss()
         c_text.text=f"{text_item}"
         print(text_item)
         self.função_sign_in=text_item
+    def menu_callback_signin(self,menu,month):
+        menu.dismiss()
+        self.sign_in_month_user=month
 
 
     # FUNÇÕES PARA INICIAR A CAPTURA FRAMES
-    def start_capture(self, camera_image, button_cp):
+    def start_capture(self, camera_image, button_cp,label_nome_h1,label_curso_h1,nome_aluno,turma_aluno,classe_aluno,n_i_turma_aluno,permicao_entrada,container_imagem):
         LiveApp.show_snackbar(self, "Carregando...")
+        lista_alunos=self.alunos
+
+
         class SimpleFacerec:
             def __init__(self):
                 self.known_face_encodings = []
                 self.known_face_names = []
 
+                nonlocal lista_alunos
+                self.lista_alunos=lista_alunos
+
+                self.alunos=lista_alunos
+
                 # Resize frame for a faster speed
                 self.frame_resizing = 0.25
                 # Limite de similaridade para reconhecimento facial
-                self.face_recognition_threshold = 0.6
+                self.face_recognition_threshold = 0.5
 
             def load_encoding_images(self, images_path):
                 """
@@ -230,7 +288,33 @@ class LiveApp(MDApp, App):
                     self.known_face_names.append(filename)
                     print("Encoding images loaded")
 
+            def update_information_aluno(self,aluno,label_nome_h1,label_curso_h1,nome_aluno,turma_aluno,classe_aluno,n_i_turma_aluno,permicao_entrada,container_imagem):
+                nome=aluno["nome"]
 
+                nome_converter=nome.split()
+                nome_primeiro_ultimo=f"{nome_converter[0]} {nome_converter[-1]}"
+
+                label_nome_h1.text=f"{nome_primeiro_ultimo}"
+                label_curso_h1.text=f"{LiveApp.curso_conversor(self,aluno['turma'])}"
+                nome_aluno.text=f"Nome:                  {nome}"
+                turma=aluno["turma"]
+                turma_aluno.text=f"Turma:                 {turma}"
+
+                classe=""
+                for caractere in turma:
+                    if caractere.isdigit():
+                        classe += caractere
+
+                classe_aluno.text=f"Classe:                  {classe}"
+                n_i_turma_aluno.text=f"Nº                           {aluno['n_i_turma']}"
+                permicao_entrada.text="Permição:              Autorizada"
+
+                caminho_foto=r"C:\Users\josem\OneDrive\Ambiente de Trabalho\Projecto_Final\faces_alunos"
+                foto=cv2.cvtColor(cv2.imread(f"{caminho_foto}\{aluno['foto_caminho']}.jpg"),cv2.COLOR_BGR2RGB)
+
+                container_imagem.texture=LiveApp.texture(self,foto)
+
+                #container_imagem.texture=LiveApp.texture(self,PIL.Image.open(f"{aluno['foto_caminho']}.jpg"))
 
             def detect_known_faces(self, frame):
                 small_frame = cv2.resize(frame, (0, 0), fx=self.frame_resizing, fy=self.frame_resizing)
@@ -255,7 +339,25 @@ class LiveApp(MDApp, App):
                         best_match_index = None
                     if matches[best_match_index]:
                         name = self.known_face_names[best_match_index]
-                    face_names.append(name)
+
+                        letras=""
+                        numeros=""
+                        name_codificade=""
+                        for caractere in name:
+                            if caractere.isdigit():
+                                numeros += caractere
+                            elif caractere.isalpha():
+                                letras += caractere
+
+                        for aluno in self.lista_alunos:
+                            if numeros==aluno["n_i_escolar"]:
+                                name_codificade=aluno["nome"]
+                                self.update_information_aluno(aluno,label_nome_h1,label_curso_h1,nome_aluno,turma_aluno,classe_aluno,n_i_turma_aluno,permicao_entrada,container_imagem)
+                        face_names.append(name_codificade)
+                    else:
+                        face_names.append("Unknown")
+
+
 
 
                 # Convert to numpy array to adjust coordinates with frame resizing quickly
@@ -274,7 +376,7 @@ class LiveApp(MDApp, App):
             self.button_cp.text="Parar Captura"
             self.sfr = SimpleFacerec()
             self.sfr.load_encoding_images(
-                r"C:\Users\venic\Programation\PycharmProjects\Project Final Course\Projecto_Final\codigo_mario\source_code\images")
+                r"C:\Users\josem\OneDrive\Ambiente de Trabalho\Projecto_Final\faces_alunos")
 
             self.webcam=Clock.schedule_interval(self.update, 1.0 / 30.0)  # Atualiza a tela a cada 1/30 segundos
 
@@ -321,7 +423,6 @@ class LiveApp(MDApp, App):
         return formatado
     def update(self, dt):
         ret, frame = self.capture.read()
-
 
         if ret:
 
@@ -426,7 +527,6 @@ class LiveApp(MDApp, App):
         self.porteiros.clear()
         self.alunos.clear()
 
-        self.receive_users_from_bd(self.connect_to_database())
 
         for n in self.secretarios:
             if len(self.data_table_adm.row_data) > 0:
@@ -656,7 +756,7 @@ class LiveApp(MDApp, App):
     def list_of_funcionarios(self,container):
         self.container_list_funcionarios = container
 
-        if self.executatar_funcao_once == False:
+        if self.executatar_funcao_once_adm == False:
             if self.connect_to_database():
 
                 self.administradores.clear()
@@ -714,7 +814,7 @@ class LiveApp(MDApp, App):
                     linha_funcionario = [" ","Monitorização" ,("information", [1, 1, 1, 1], f" {id}  "), nome, n_telefone, id_funcionario ]
                     self.data_table_adm.row_data.append(linha_funcionario)
 
-                self.executatar_funcao_once = True
+                self.executatar_funcao_once_adm = True
             else:
                 self.show_snackbar("Erro Ao Conectar Com O Servidor")
         else:
@@ -818,7 +918,7 @@ class LiveApp(MDApp, App):
         self.N_id_turma_edit=N_id_turma
         self.Container_imagem_edit=container
     def delete_aluno_image(self,id):
-
+        print(id)
         nome=self.alunos[int(id)-1]["nome"]
         id_esc=self.alunos[int(id)-1]["n_i_escolar"]
 
@@ -1022,14 +1122,9 @@ class LiveApp(MDApp, App):
                 print(str(aluno["nascimento"]))
                 nascimento_row = re.findall(r'\d+', str(aluno["nascimento"]))
                 nascimento = f"{nascimento_row[2]}/{nascimento_row[1]}/{nascimento_row[0]}"
-            curso = ""
+            curso = self.curso_conversor(aluno["turma"])
             turno = aluno["turno"]
-            curso_tipo = turma[:2]
 
-            if curso_tipo == "TI":
-                curso = "Técnico Informático"
-            if curso_tipo == "DT":
-                curso = "Desenhador Projetista"
 
             linha_aluno = [" ", ("information", [1, 1, 1, 1], f"  {id}"), nome, turma, id_turma, id_escola, curso,
                            turno, nascimento, ]
@@ -1141,18 +1236,13 @@ class LiveApp(MDApp, App):
                     turma=aluno["turma"]
                     id_turma=aluno["n_i_turma"]
                     id_escola=aluno["n_i_escolar"]
+                    turno=aluno["turno"]
                     if aluno["nascimento"]!=None:
                         print(str(aluno["nascimento"]))
                         nascimento_row=re.findall(r'\d+',str(aluno["nascimento"]))
                         nascimento=f"{nascimento_row[2]}/{nascimento_row[1]}/{nascimento_row[0]}"
-                    curso=""
-                    turno=aluno["turno"]
-                    curso_tipo=turma[:2]
+                    curso=self.curso_conversor(aluno["turma"])
 
-                    if curso_tipo=="TI":
-                        curso="Técnico Informático"
-                    if curso_tipo=="DT":
-                        curso="Desenhador Projetista"
 
 
 
@@ -1188,14 +1278,8 @@ class LiveApp(MDApp, App):
                     print(str(aluno["nascimento"]))
                     nascimento_row = re.findall(r'\d+', str(aluno["nascimento"]))
                     nascimento = f"{nascimento_row[2]}/{nascimento_row[1]}/{nascimento_row[0]}"
-                curso = ""
-                turno = aluno["turno"]
-                curso_tipo = turma[:2]
+                curso = self.curso_conversor(aluno["turma"])
 
-                if curso_tipo == "TI":
-                    curso = "Técnico Informático"
-                if curso_tipo == "DT":
-                    curso = "Desenhador Projetista"
 
                 linha_aluno = [" ", ("information", [1, 1, 1, 1], f"  {id}"), nome, turma, id_turma, id_escola,curso,turno, nascimento, ]
 
@@ -1318,6 +1402,15 @@ class LiveApp(MDApp, App):
             return None
     def close_dialog(self, *args):
         self.dialog.dismiss()
+    def curso_conversor(self,turma):
+
+        turma_inciais = turma[:2]
+        if turma_inciais =="TI":
+            curso = "Técnico Informático"
+        if turma_inciais == "DT":
+            curso = "Desenhador Projetista"
+
+        return curso
 
 # finally, run the app
 if __name__ == "__main__":
