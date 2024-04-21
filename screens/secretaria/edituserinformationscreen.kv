@@ -1,6 +1,6 @@
 <EditUserInformationScreen>
     name:"EditUserInformationScreen"
-    on_pre_enter:app.save_edit_widgets(Nome,Nascimento,Turno,Turma,N_estudante,N_id,container)
+    on_pre_enter:app.save_edit_widgets(Nome,Nascimento,Turno,Turma,N_estudante,N_id,container,propina_c)
 
     MDBoxLayout:
         orientation:"vertical"
@@ -127,8 +127,18 @@
                         text:"Editar  Dados"
                         md_bg_color:app.theme_cls.primary_color
                         pos_hint:{"center_y":.1,"center_x":.45}
-                        on_release:app.user_edit_send_adm(Nome.text,N_id.text,N_estudante.text,Turma.text,Nascimento.text,Turno.text)
+                        on_release:app.user_edit_send(Nome.text,N_id.text,N_estudante.text,Turma.text,Nascimento.text,Turno.text,propina_c.text)
 
+
+                    MDRaisedButton:
+                        id:propina_c
+                        text: "Propina"
+                        theme_text_color: "Custom"
+                        text_color: "white"
+                        md_bg_color:0,0,0,1
+                        size_hint_y:.1
+                        pos_hint:{"center_y":.6,"center_x":.9}
+                        on_release:app.open_menu_signin(propina_c,propina_c)
 
 
 

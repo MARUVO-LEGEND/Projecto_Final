@@ -1,6 +1,5 @@
 <DoorMonitoramentScreen>
     name:"DoorMonitoramentScreen"
-
     MDBoxLayout:
 
 
@@ -22,7 +21,7 @@
                     MDBoxLayout:
                         MDFloatLayout:
                             MDCard:
-                                md_bg_color:.3,.3,.3,1
+                                md_bg_color:app.theme_cls.primary_color
                                 size_hint_y:.5
                                 size_hint_x:.5
                                 pos_hint:{"center_x":.5,"center_y":.5}
@@ -50,8 +49,9 @@
             MDBoxLayout:
 
                 MDCard:
+                    id:fundo1
                     orientation:"vertical"
-                    md_bg_color:.3,.3,.3,1
+                    md_bg_color:.1,.1,.1,1
                     radius:[0,0,0,0]
                     padding:30
                     MDBoxLayout:

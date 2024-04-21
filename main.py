@@ -87,7 +87,7 @@ class LiveApp(MDApp, App):
         self.theme_cls.material_style = "M3"
         self.primary_theme = self.theme_cls
         self.theme_cls.theme_style = "Dark"
-        self.primary_theme.primary_palette = "LightBlue"
+        self.primary_theme.primary_palette = "Cyan"
         self.primary_theme.primary_hue = "800"
 
         # LISTA ONDE SERÃO GUARDADOS OS DADOS DOS USUARIOS VINDO DO BANCO DE DADOS
@@ -98,7 +98,7 @@ class LiveApp(MDApp, App):
         self.alunos=[]
 
         # CAMINHO DAS IMAGENS DA FACE DOS ALUNOS
-        self.caminho_imagem_faces_alunos=r"C:\Users\josem\OneDrive\Ambiente de Trabalho\Projecto_Final\faces_alunos"
+        self.caminho_imagem_faces_alunos=r"C:\Users\venic\Programation\PycharmProjects\Project Final Course\Projecto_Final\faces_alunos"
 
         #VARIAVEIS ONDE SERÃO ARMAZENADAS OS TEXTFIELD DA SCREEN EDITUSERINFORMATIONSCREEN
         self.Nome_edit=None
@@ -107,6 +107,7 @@ class LiveApp(MDApp, App):
         self.Turma_edit=None
         self.N_id_escolar=None
         self.N_id_turma=None
+        self.Propina_edit=None
 
         #VARIAVEIS ONDE SERÃO ARMAZENADAS OS TEXTFIELD DA SCREEN EDITFUNCIONARIOINFORMATIONSCREEN
         self.Nome_edit_adm=None
@@ -137,17 +138,17 @@ class LiveApp(MDApp, App):
         self.executar_verificador_n=1
 
         self.tipo_tema = 0 # dark==0 | light=1
-
-
+        self.theme_cyan_color_0=(202/255,223/255,203/255,1)
+        self.theme_cyan_color_1=(28/255,80/255,82/255,1)
+        self.theme_cyan_color_2=(33/255,54/255,53/255,1)
+        self.theme_cyan_color_3=(10/255,12/255,13/255,1)
         self.função_sign_in=""
 
         return Factory.MainScreenManager()
 
-    # MUDAR TEMA DA APP
+    #  TEMA DA APP
     def theme_change(self, icon):
-        self.theme_cls.primary_palette = (
-            "Blue" if self.theme_cls.primary_palette == "LightBlue" else "LightBlue"
-        )
+
 
         if self.theme_cls.theme_style == "Light":
             self.theme_cls.theme_style = "Dark"
@@ -157,43 +158,44 @@ class LiveApp(MDApp, App):
             self.theme_cls.theme_style = "Light"
             self.tipo_tema = 1
 
-        print(self.tipo_tema)
-
         icon.theme_text_color = "Custom"
         icon.md_bg_color = [0.1, 0.1, 0.1, 1] if icon.md_bg_color == [.9, .9, .9, 1] else [.9, .9, .9, 1]
         icon.text_color = [0.1, 0.1, 0.1, 1] if icon.text_color == [.9, .9, .9, 1] else [.9, .9, .9, 1]
 
-        if self.theme_cls.primary_palette == "Blue":
-            self.primary_theme.primary_hue = "600"
-        else:
-            self.theme_cls.primary_hue = "800"
-
-    def verificador_tema_label(self, label,fundo1,fundo2):
+    def verificador_tema_label(self, label):
         print(self.tipo_tema)
         label.theme_text_color = "Custom"
         if self.tipo_tema == 1:
             print("exe")
             label.text_color = (0, 0, 0, 1)
-            if fundo1:
-                fundo1.md_bg_color=(0.2, 0.2, 0.2, 1)
         elif self.tipo_tema == 0:
             print("exe")
             label.text_color = (1, 1, 1, 1)
+    def verificador_tema_bg(self,fundo1,fundo2):
+        print(self.tipo_tema)
+        if self.tipo_tema == 0:
+            print("tema preto")
+            print(fundo2)
+            fundo1.md_bg_color =(.1,.1,.1,1)
+            fundo2.md_bg_color = self.theme_cyan_color_2
 
+        elif self.tipo_tema == 1:
+            print("tema branco")
+            fundo1.md_bg_color = self.theme_cyan_color_2
+            fundo2.md_bg_color = self.theme_cyan_color_1
     def theme_orange(self):
         self.theme_cls.primary_palette    = "Orange"
-        self.primary_theme.primary_hue = "600"
+        self.primary_theme.primary_hue = "800"
     def theme_blue(self):
-        self.theme_cls.primary_palette = "Blue"
-        self.primary_theme.primary_hue = "600"
+        self.theme_cls.primary_palette = "Cyan"
+        self.primary_theme.primary_hue = "800"
     def theme_red(self):
         self.theme_cls.primary_palette = "Red"
-        self.primary_theme.primary_hue = "900"
+        self.primary_theme.primary_hue = "800"
 
 
     # FUNÇÕES PARA ABRIR UM MENU DE OPÇÕES
     def open_menu_adm(self,container_dropdown,container_text):
-
 
         função=["Secretaria","Portaria","Monitoração"]
         menu_items = [
@@ -211,7 +213,7 @@ class LiveApp(MDApp, App):
             width_mult=4,
         )
         menu.open()
-    def open_menu_signin(self,container_dropdown):
+    def open_menu_signin(self,container_dropdown,text):
 
 
         função=["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"]
@@ -219,8 +221,8 @@ class LiveApp(MDApp, App):
             {
                 "text": f"{função[i]}",
                 "viewclass": "OneLineListItem",
-                "on_release": lambda x=f"{função[i]}":self.menu_callback(x,menu,month),
-            } for i in range(3)
+                "on_release": lambda x=f"{função[i]}":self.menu_callback_signin(x,menu,text),
+            } for i in range(12)
         ]
         menu = MDDropdownMenu(
             caller=container_dropdown,
@@ -234,10 +236,15 @@ class LiveApp(MDApp, App):
         menu.dismiss()
         c_text.text=f"{text_item}"
         print(text_item)
-        self.função_sign_in=text_item
-    def menu_callback_signin(self,menu,month):
+        self.função_sign_in = text_item
+    def menu_callback_signin(self,text_item,menu,c_text):
         menu.dismiss()
-        self.sign_in_month_user=month
+        c_text.text = f"{text_item}"
+        c_text.text_color="gray"
+        print(c_text)
+        self.sign_in_month_user = text_item
+
+
 
 
     # FUNÇÕES PARA INICIAR A CAPTURA FRAMES
@@ -874,11 +881,11 @@ class LiveApp(MDApp, App):
 
 
     # FUNÇÕES DA TELA SIGN IN SCREEN
-    def insert_user(self, conn, nome,n_id_escolar,n_id_turma,turma,foto_caminho,nascimnto,turno):
+    def insert_user(self, conn, nome,n_id_escolar,n_id_turma,turma,foto_caminho,nascimnto,turno,propina):
         try:
             cursor = conn.cursor()
-            sql = "INSERT INTO aluno (nome,n_i_escolar,n_i_turma,foto_caminho,turma,nascimento,turno) VALUES (%s,%s,%s,%s,%s,%s,%s)"
-            cursor.execute(sql, (nome,n_id_escolar,n_id_turma,foto_caminho,turma,nascimnto,turno))
+            sql = "INSERT INTO aluno (nome,n_i_escolar,n_i_turma,foto_caminho,turma,nascimento,turno,mes_propina_paga) VALUES (%s,%s,%s,%s,%s,%s,%s,%s)"
+            cursor.execute(sql, (nome,n_id_escolar,n_id_turma,foto_caminho,turma,nascimnto,turno,propina))
             conn.commit()
             print("Usuário inserido com sucesso!")
         except mysql.connector.Error as err:
@@ -887,27 +894,27 @@ class LiveApp(MDApp, App):
         converter_nascimento = str(nascimento).split("/")
         nascimento_convertido = f"{converter_nascimento[2]}/{converter_nascimento[1]}/{converter_nascimento[0]}"
         return nascimento_convertido
-    def update_user(self,conn,nome,n_id_escolar,n_id_turmaa,turma,nascimento,turno):
+    def update_user(self,conn,nome,n_id_escolar,n_id_turmaa,turma,nascimento,turno,propina):
 
         nascimento_convertido=self.convert_nascimento_dd_to_yy(nascimento)
         id_convert=self.id_edit_user.split(" ")
         id=int(id_convert[-1])
         try:
             cursor = conn.cursor()
-            sql = f'UPDATE aluno set nome="{str(nome)}",n_i_escolar={int(n_id_escolar)},n_i_turma={int(n_id_turmaa)},turma="{str(turma)}",nascimento="{str(nascimento_convertido)}",turno="{str(turno)}" where id_aluno={id}'
+            sql = f'UPDATE aluno set nome="{str(nome)}",n_i_escolar={int(n_id_escolar)},n_i_turma={int(n_id_turmaa)},turma="{str(turma)}",nascimento="{str(nascimento_convertido)}",turno="{str(turno)}",mes_propina_paga="{str(propina)}" where id_aluno={id}'
             cursor.execute(sql)
             conn.commit()
             self.show_snackbar("Usuario Editado Com Sucesso!")
             print("Usuário atualizados com sucesso!")
-            self.update_row_datatable(id)
+            self.update_row_datatable()
             self.change_screen_left(self.root_manager,"EditUserInformationScreen")
         except mysql.connector.Error as err:
             print(f"Erro ao atualizar usuário: {err}")
-    def user_edit_send(self,Nome,N_id_turma,N_id_estudante,Turma,Nascimento,Turno):
+    def user_edit_send(self,Nome,N_id_turma,N_id_estudante,Turma,Nascimento,Turno,Propina):
         if self.edit_image==True:
             pass
-        self.update_user(self.connect_to_database(),Nome,N_id_turma,N_id_estudante,Turma,Nascimento,Turno)
-    def save_edit_widgets(self,Nome,Nascimento,Turno,Turma,N_id_escolar,N_id_turma,container):
+        self.update_user(self.connect_to_database(),Nome,N_id_turma,N_id_estudante,Turma,Nascimento,Turno,Propina)
+    def save_edit_widgets(self,Nome,Nascimento,Turno,Turma,N_id_escolar,N_id_turma,container,Propina):
 
         self.Nome_edit=Nome
 
@@ -917,6 +924,7 @@ class LiveApp(MDApp, App):
         self.N_id_escolar_edit=N_id_escolar
         self.N_id_turma_edit=N_id_turma
         self.Container_imagem_edit=container
+        self.Propina_edit=Propina
     def delete_aluno_image(self,id):
         print(id)
         nome=self.alunos[int(id)-1]["nome"]
@@ -986,6 +994,7 @@ class LiveApp(MDApp, App):
                 self.Turma_edit.text=f"{aluno['turma']}"
                 self.N_id_turma_edit.text=f"{aluno['n_i_escolar']}"
                 self.N_id_escolar_edit.text=f"{aluno['n_i_turma']}"
+                self.Propina_edit.text=f"{aluno['mes_propina_paga']}"
 
                 self.Container_imagem_edit.source=f"faces_alunos/{str(aluno['foto_caminho'])}.jpg"
     def convert_name_to_file(self,nome,id_esc):
@@ -993,12 +1002,9 @@ class LiveApp(MDApp, App):
         nome_formatado_sem_acentos = unidecode(nome_formatado)
         formatado = f"{nome_formatado_sem_acentos}{id_esc}.jpg"
         return formatado
+    def sign_in_send(self,nome,n_id_escolar,n_id_turma,turma,nascimento,turno,propina):
 
-
-    #FUNÇÕES DA TELA LOGIN SCREEN
-    def sign_in_send(self,nome,n_id_escolar,n_id_turma,turma,nascimento,turno):
-
-        if nome and n_id_turma and n_id_escolar and turma and nascimento and turno !="":
+        if nome and n_id_turma and n_id_escolar and turma and nascimento and turno !="" and propina=="Propina":
 
             if None in self.last_frame:
                 self.show_snackbar("Termine de Tirar Foto!")
@@ -1009,14 +1015,26 @@ class LiveApp(MDApp, App):
                 converter_nascimento3=converter_nascimento2.split("/")
                 nascimento_convertido = f"{converter_nascimento3[2]}/{converter_nascimento3[1]}/{converter_nascimento3[0]}"
                 foto_caminho_save=self.save_last_frame(self.last_frame,nome,n_id_escolar)
-                self.insert_user(self.connect_to_database(),nome,n_id_escolar,n_id_turma,turma,foto_caminho_save,nascimento_convertido,turno)
+                self.insert_user(self.connect_to_database(),nome,n_id_escolar,n_id_turma,turma,foto_caminho_save,nascimento_convertido,turno,propina)
                 self.show_snackbar("Usuario Guardado com Sucesso")
                 self.last_frame=[None]
 
         else:
             self.show_snackbar("Termine de Colocar os Dados!")
-    def login_verification(self, root_manager, nome, senha):
 
+    def clean_textfield(self,Nome,Nascimento,Turno,Turma,N_id_escolar,N_id_turma,Propina):
+        Nome.text=""
+        Nascimento.text=""
+        Turno.text=""
+        Turma.text=""
+        N_id_escolar.text=""
+        N_id_turma.text=""
+        Propina.text="Propina"
+        Propina.text_color="white"
+
+
+    #FUNÇÕES DA TELA LOGIN SCREEN
+    def login_verification(self, root_manager, nome, senha):
 
         existence_user=[]
 
@@ -1124,10 +1142,11 @@ class LiveApp(MDApp, App):
                 nascimento = f"{nascimento_row[2]}/{nascimento_row[1]}/{nascimento_row[0]}"
             curso = self.curso_conversor(aluno["turma"])
             turno = aluno["turno"]
+            propina=aluno["mes_propina_paga"]
 
 
             linha_aluno = [" ", ("information", [1, 1, 1, 1], f"  {id}"), nome, turma, id_turma, id_escola, curso,
-                           turno, nascimento, ]
+                           turno, nascimento,propina ]
 
             self.data_table.row_data.append(linha_aluno)
     def show_aluno_data(self,id,container_imagem,container_texto):
@@ -1213,14 +1232,15 @@ class LiveApp(MDApp, App):
                     use_pagination=True,
                     column_data=[
                         ("", (5)),
-                        ("id", (30)),
-                        ("Nome", (30)),
-                        ("Turma", (30)),
-                        ("Nº Turma", (30)),
-                        ("Nº Escolar", (30)),
-                        ("Curso", (30)),
-                        ("Turno", (30)),
-                        ("Nascimento", (30)),
+                        ("id", (28)),
+                        ("Nome", (28)),
+                        ("Turma", (28)),
+                        ("Nº Turma", (28)),
+                        ("Nº Escolar", (28)),
+                        ("Curso", (28)),
+                        ("Turno", (28)),
+                        ("Nascimento", (28)),
+                        ("Propina", (28)),
 
                     ],
                 )
@@ -1237,6 +1257,7 @@ class LiveApp(MDApp, App):
                     id_turma=aluno["n_i_turma"]
                     id_escola=aluno["n_i_escolar"]
                     turno=aluno["turno"]
+                    propina=aluno["mes_propina_paga"]
                     if aluno["nascimento"]!=None:
                         print(str(aluno["nascimento"]))
                         nascimento_row=re.findall(r'\d+',str(aluno["nascimento"]))
@@ -1246,7 +1267,7 @@ class LiveApp(MDApp, App):
 
 
 
-                    linha_aluno=[" ",("information",[1,1,1,1],f"  {id}"),nome,turma,id_turma,id_escola,curso,turno,nascimento,]
+                    linha_aluno=[" ",("information",[1,1,1,1],f"  {id}"),nome,turma,id_turma,id_escola,curso,turno,nascimento,propina]
 
                     self.data_table.row_data.append(linha_aluno)
 
@@ -1274,6 +1295,7 @@ class LiveApp(MDApp, App):
                 turma = aluno["turma"]
                 id_turma = aluno["n_i_turma"]
                 id_escola = aluno["n_i_escolar"]
+                turno=aluno["turno"]
                 if aluno["nascimento"] != None:
                     print(str(aluno["nascimento"]))
                     nascimento_row = re.findall(r'\d+', str(aluno["nascimento"]))
@@ -1378,6 +1400,7 @@ class LiveApp(MDApp, App):
                     aluno["turma"]=linha[5]
                     aluno["nascimento"]=linha[6]
                     aluno["turno"]=linha[7]
+                    aluno["mes_propina_paga"]=linha[8]
                     self.alunos.append(aluno)
 
 

@@ -1,5 +1,6 @@
 <SignInScreen>
     name:"SignInScreen"
+    on_pre_enter:app.verificador_tema_bg(fundo1,fundo2)
 
     MDBoxLayout:
         orientation:"vertical"
@@ -16,7 +17,10 @@
             MDBoxLayout:
                 orientation:"vertical"
                 MDBoxLayout:
+
                     MDFloatLayout:
+
+
                         Image:
                             id:container
                             source:"images/icon_capture.png"
@@ -33,9 +37,12 @@
                             pos_hint:{"center_y":.1,"center_x":.40}
                             on_release:app.start_capture_sign(container,btn)
                             pos_hint:{"center_y":.2,"center_x":.5}
-
+                        MDLabel:
+                            id:fundo2
+                            opacity:0
 
             MDBoxLayout:
+                id:fundo1
                 md_bg_color:.1,.1,.1,0.5
                 padding:25
                 MDFloatLayout:
@@ -128,9 +135,24 @@
                     MDFillRoundFlatButton:
                         text:"Guardar  Dados"
                         md_bg_color:app.theme_cls.primary_color
-                        pos_hint:{"center_y":.1,"center_x":.45}
-                        on_release:app.sign_in_send(Nome.text,N_id.text,N_estudante.text,Turma.text,Nascimento.text,Turno.text)
+                        pos_hint:{"center_y":.1,"center_x":.35}
+                        on_release:app.sign_in_send(Nome.text,N_id.text,N_estudante.text,Turma.text,Nascimento.text,Turno.text,propina_c.text)
+                    MDFillRoundFlatButton:
+                        text:"Limpar"
+                        md_bg_color:app.theme_cls.primary_color
+                        pos_hint:{"center_y":.1,"center_x":.65}
+                        font_name:"fonts/static/Montserrat-Medium.ttf"
+                        on_release:app.clean_textfield(Nome,N_id,N_estudante,Turma,Nascimento,Turno,propina_c)
 
+                    MDRaisedButton:
+                        id:propina_c
+                        text: "Propina"
+                        theme_text_color: "Custom"
+                        text_color: "white"
+                        md_bg_color:0,0,0,1
+                        size_hint_y:.1
+                        pos_hint:{"center_y":.6,"center_x":.9}
+                        on_release:app.open_menu_signin(propina_c,propina_c)
 
 
 
