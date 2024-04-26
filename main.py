@@ -1,7 +1,9 @@
 import os
 import re
+import shutil
 import glob
 import  PIL
+import datetime
 import numpy as np
 import face_recognition
 from unidecode import unidecode
@@ -99,6 +101,8 @@ class LiveApp(MDApp, App):
 
         # CAMINHO DAS IMAGENS DA FACE DOS ALUNOS
         self.caminho_imagem_faces_alunos=r"C:\Users\venic\Programation\PycharmProjects\Project Final Course\Projecto_Final\faces_alunos"
+        self.caminho_imagem_faces_aluno_gray=""
+        self.caminho_imagem_faces_alunos_colored=""
 
         #VARIAVEIS ONDE SERÃO ARMAZENADAS OS TEXTFIELD DA SCREEN EDITUSERINFORMATIONSCREEN
         self.Nome_edit=None
@@ -109,11 +113,22 @@ class LiveApp(MDApp, App):
         self.N_id_turma=None
         self.Propina_edit=None
 
-        #VARIAVEIS ONDE SERÃO ARMAZENADAS OS TEXTFIELD DA SCREEN EDITFUNCIONARIOINFORMATIONSCREEN
+        #VARIAVEIS ONDE SERÃO ARMAZENADAS OS TEXTFIELD DA SCREEN ADMINSCREEN
         self.Nome_edit_adm=None
         self.Telefone_edit_adm=None
         self.Senha_edit_adm=None
         self.Id_funcionario_edit_adm=None
+
+        self.camera_image_capture=None
+        self.button_cp_capture=None
+        self.label_nome_h1_capture=None
+        self.label_curso_h1_capture=None
+        self.nome_aluno_capture=None
+        self.turma_aluno_capture=None
+        self.classe_aluno_capture=None
+        self.n_i_turma_aluno=None
+        self.permicao_entrada=None
+        self.image_aluno=None
 
         #VARIAVEIS PARA AUXILIAR NO CODIGO
         #bool que ira informar se a função list_of_alunos já foi executada uma vez
@@ -128,6 +143,8 @@ class LiveApp(MDApp, App):
         self.cp_on = False
         #armazena o ultimo frame capturado
         self.last_frame=[None]
+        self.save_dataset_frames_colored=[]
+        self.save_dataset_frames_gray=[]
 
         self.root_managerr=None
 
@@ -144,6 +161,12 @@ class LiveApp(MDApp, App):
         self.theme_cyan_color_3=(10/255,12/255,13/255,1)
         self.função_sign_in=""
 
+        self.number_frames_captured_dataset=0
+        self.is_capturing_dataset=False
+        self.is_capturing_profile=False
+
+        self.faces=[]
+        self.ids=[]
         return Factory.MainScreenManager()
 
     #  TEMA DA APP
@@ -181,8 +204,8 @@ class LiveApp(MDApp, App):
 
         elif self.tipo_tema == 1:
             print("tema branco")
-            fundo1.md_bg_color = self.theme_cyan_color_2
-            fundo2.md_bg_color = self.theme_cyan_color_1
+            fundo1.md_bg_color = (1,1,1,1)
+            fundo2.md_bg_color = (1,1,1,1)
     def theme_orange(self):
         self.theme_cls.primary_palette    = "Orange"
         self.primary_theme.primary_hue = "800"
@@ -192,8 +215,6 @@ class LiveApp(MDApp, App):
     def theme_red(self):
         self.theme_cls.primary_palette = "Red"
         self.primary_theme.primary_hue = "800"
-
-
     # FUNÇÕES PARA ABRIR UM MENU DE OPÇÕES
     def open_menu_adm(self,container_dropdown,container_text):
 
@@ -244,134 +265,55 @@ class LiveApp(MDApp, App):
         print(c_text)
         self.sign_in_month_user = text_item
 
-
-
-
     # FUNÇÕES PARA INICIAR A CAPTURA FRAMES
-    def start_capture(self, camera_image, button_cp,label_nome_h1,label_curso_h1,nome_aluno,turma_aluno,classe_aluno,n_i_turma_aluno,permicao_entrada,container_imagem):
+
+    def create_path_aluno(self, nome, n_id_estudante):
+        nome_formatado = nome.lower().replace(" ", "")
+        nome_formatado_sem_acentos = unidecode(nome_formatado)
+        formatado = f"{nome_formatado_sem_acentos}{n_id_estudante}"
+        caminho_absoluto = self.caminho_imagem_faces_alunos
+        caminho_completo = os.path.join(caminho_absoluto, f"{formatado}")
+        os.makedirs(caminho_completo)
+        caminho_gray_aluno=os.path.join(caminho_completo,f"gray")
+        caminho_colored_aluno=os.path.join(caminho_completo,f"profile")
+        return caminho_completo,caminho_gray_aluno,caminho_colored_aluno,formatado
+    def start_capture_sign_in_dataset(self,camera_image, button_cp):
+
+
+        self.capture = cv2.VideoCapture(0)
+        self.camera_image = camera_image
+        self.is_capturing_dataset = True
+
+        self.cp_on=True if self.cp_on==False else self.cp_on==False
+        self.button_cp = button_cp
+
+        if self.cp_on==True:
+            self.button_cp.text="Parar Captura"
+            self.webcam=Clock.schedule_interval(self.update_sign_in_dataset, 1.0 / 30.0)  # Atualiza a tela a cada 1/30 segundos
+
+
+
+        else:
+            self.button_cp.text="Iniciar Captura"
+            self.webcam.cancel()
+    def start_capture(self, camera_image, button_cp,label_nome_h1,label_curso_h1,nome_aluno,turma_aluno,classe_aluno,n_i_turma_aluno,permicao_entrada,image_aluno):
         LiveApp.show_snackbar(self, "Carregando...")
-        lista_alunos=self.alunos
 
+        self.camera_image_capture=camera_image
+        self.button_cp_capture=button_cp
+        self.label_nome_h1_capture=label_nome_h1
+        self.label_curso_h1_capture=label_curso_h1
+        self.nome_aluno_capture=nome_aluno
+        self.turma_aluno_capture=turma_aluno
+        self.classe_aluno_capture=classe_aluno
+        self.n_i_turma_aluno=n_i_turma_aluno
+        self.permicao_entrada=permicao_entrada
+        self.image_aluno=image_aluno
 
-        class SimpleFacerec:
-            def __init__(self):
-                self.known_face_encodings = []
-                self.known_face_names = []
-
-                nonlocal lista_alunos
-                self.lista_alunos=lista_alunos
-
-                self.alunos=lista_alunos
-
-                # Resize frame for a faster speed
-                self.frame_resizing = 0.25
-                # Limite de similaridade para reconhecimento facial
-                self.face_recognition_threshold = 0.5
-
-            def load_encoding_images(self, images_path):
-                """
-                Load encoding images from path
-                :param images_path:
-                :return:
-                """
-                # Load Images
-                images_path = glob.glob(os.path.join(images_path, "*.*"))
-
-                print("{} encoding images found.".format(len(images_path)))
-
-                # Store image encoding and names
-                for img_path in images_path:
-                    img = cv2.imread(img_path)
-                    print(img_path)
-                    rgb_img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
-
-                    # Get the filename only from the initial file path.
-                    basename = os.path.basename(img_path)
-                    (filename, ext) = os.path.splitext(basename)
-                    # Get encoding
-
-                    img_encoding = face_recognition.face_encodings(rgb_img)[0]
-                    self.known_face_encodings.append(img_encoding)
-                    self.known_face_names.append(filename)
-                    print("Encoding images loaded")
-
-            def update_information_aluno(self,aluno,label_nome_h1,label_curso_h1,nome_aluno,turma_aluno,classe_aluno,n_i_turma_aluno,permicao_entrada,container_imagem):
-                nome=aluno["nome"]
-
-                nome_converter=nome.split()
-                nome_primeiro_ultimo=f"{nome_converter[0]} {nome_converter[-1]}"
-
-                label_nome_h1.text=f"{nome_primeiro_ultimo}"
-                label_curso_h1.text=f"{LiveApp.curso_conversor(self,aluno['turma'])}"
-                nome_aluno.text=f"Nome:                  {nome}"
-                turma=aluno["turma"]
-                turma_aluno.text=f"Turma:                 {turma}"
-
-                classe=""
-                for caractere in turma:
-                    if caractere.isdigit():
-                        classe += caractere
-
-                classe_aluno.text=f"Classe:                  {classe}"
-                n_i_turma_aluno.text=f"Nº                           {aluno['n_i_turma']}"
-                permicao_entrada.text="Permição:              Autorizada"
-
-                caminho_foto=r"C:\Users\josem\OneDrive\Ambiente de Trabalho\Projecto_Final\faces_alunos"
-                foto=cv2.cvtColor(cv2.imread(f"{caminho_foto}\{aluno['foto_caminho']}.jpg"),cv2.COLOR_BGR2RGB)
-
-                container_imagem.texture=LiveApp.texture(self,foto)
-
-                #container_imagem.texture=LiveApp.texture(self,PIL.Image.open(f"{aluno['foto_caminho']}.jpg"))
-
-            def detect_known_faces(self, frame):
-                small_frame = cv2.resize(frame, (0, 0), fx=self.frame_resizing, fy=self.frame_resizing)
-                # Find all the faces and face encodings in the current frame of video
-                # Convert the image from BGR color (which OpenCV uses) to RGB color (which face_recognition uses)
-                rgb_small_frame = cv2.cvtColor(small_frame, cv2.COLOR_BGR2RGB)
-                face_locations = face_recognition.face_locations(rgb_small_frame)
-                face_encodings = face_recognition.face_encodings(rgb_small_frame, face_locations)
-
-                face_names = []
-                for face_encoding in face_encodings:
-                    # See if the face is a match for the known face(s)
-                    matches = face_recognition.compare_faces(self.known_face_encodings, face_encoding,
-                                                             tolerance=self.face_recognition_threshold)
-                    name = "Unknown"
-
-                    # Or instead, use the known face with the smallest distance to the new face
-                    face_distances = face_recognition.face_distance(self.known_face_encodings, face_encoding)
-                    if any(face_distances) :
-                        best_match_index = np.argmin(face_distances)
-                    else:
-                        best_match_index = None
-                    if matches[best_match_index]:
-                        name = self.known_face_names[best_match_index]
-
-                        letras=""
-                        numeros=""
-                        name_codificade=""
-                        for caractere in name:
-                            if caractere.isdigit():
-                                numeros += caractere
-                            elif caractere.isalpha():
-                                letras += caractere
-
-                        for aluno in self.lista_alunos:
-                            if numeros==aluno["n_i_escolar"]:
-                                name_codificade=aluno["nome"]
-                                self.update_information_aluno(aluno,label_nome_h1,label_curso_h1,nome_aluno,turma_aluno,classe_aluno,n_i_turma_aluno,permicao_entrada,container_imagem)
-                        face_names.append(name_codificade)
-                    else:
-                        face_names.append("Unknown")
-
-
-
-
-                # Convert to numpy array to adjust coordinates with frame resizing quickly
-                face_locations = np.array(face_locations)
-                face_locations = face_locations / self.frame_resizing
-                return face_locations.astype(int), face_names
-
+        self.faceCascade = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
+        self.cap = cv2.VideoCapture(0)
+        self.clf = cv2.face.LBPHFaceRecognizer_create()
+        self.clf.read("classifier.xml")
 
         self.capture = cv2.VideoCapture(0)
         self.camera_image = camera_image
@@ -381,9 +323,6 @@ class LiveApp(MDApp, App):
 
         if self.cp_on==True:
             self.button_cp.text="Parar Captura"
-            self.sfr = SimpleFacerec()
-            self.sfr.load_encoding_images(
-                r"C:\Users\josem\OneDrive\Ambiente de Trabalho\Projecto_Final\faces_alunos")
 
             self.webcam=Clock.schedule_interval(self.update, 1.0 / 30.0)  # Atualiza a tela a cada 1/30 segundos
 
@@ -399,11 +338,11 @@ class LiveApp(MDApp, App):
         self.button_cp = button_cp
 
         if self.cp_on==True:
-            self.button_cp.text="Parar Captura"
+            self.button_cp.text="Parar Captura Perfil"
             self.webcam=Clock.schedule_interval(self.update_sign, 1.0 / 30.0)  # Atualiza a tela a cada 1/30 segundos
-
+            self.is_capturing_profile=True
         else:
-            self.button_cp.text="Iniciar Captura"
+            self.button_cp.text="Iniciar Captura Prefil"
             self.webcam.cancel()
     def start_capture_edit(self, camera_image, button_cp):
 
@@ -428,26 +367,58 @@ class LiveApp(MDApp, App):
         caminho_completo = os.path.join(caminho_absoluto, f"{formatado}.jpg")
         cv2.imwrite(caminho_completo, frame)
         return formatado
+
+    def recognize(self,img, clf, faceCascade):
+        self.draw_boundary(img, faceCascade, scaleFactor=1.1, minNeighbors=5, color=(255, 255, 255), text="Face", clf=clf)
+        return img
     def update(self, dt):
         ret, frame = self.capture.read()
 
         if ret:
-
             # Detect Faces
-            face_locations, face_names = self.sfr.detect_known_faces(frame)
-            for face_loc, name in zip(face_locations, face_names):
-                y1, x2, y2, x1 = face_loc[0], face_loc[1], face_loc[2], face_loc[3]
+            frame_fr = self.recognize(frame, self.clf, self.faceCascade)
 
-                cv2.putText(frame, name, (x1, y1 - 10), cv2.FONT_HERSHEY_DUPLEX, 1, (0, 0, 200), 2)
-                cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 0, 200), 4)
+            # Converte a imagem de BGR para RGB para exibição no Kivy
+            frame_rgb=cv2.cvtColor(frame_fr,cv2.COLOR_BGR2RGB)
+            # Atualiza a imagem na interface do usuário0
+            self.camera_image.texture = self.texture(frame_rgb)
 
-        # Converte a imagem de BGR para RGB para exibição no Kivy
-        frame_rgb=cv2.cvtColor(frame,cv2.COLOR_BGR2RGB)
-        self.last_frame=frame_rgb
+    def draw_boundary(self,img, classifier, scaleFactor, minNeighbors, color, text, clf):
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        features = classifier.detectMultiScale(gray, scaleFactor, minNeighbors)
 
+        for (x, y, w, h) in features:
+            # Aumentar a região capturada para incluir o queixo e parte do pescoço
+            y -= int(0.1 * h)
+            h += int(0.3 * h)
 
-        # Atualiza a imagem na interface do usuário
-        self.camera_image.texture = self.texture(frame_rgb)
+            # Desenhar retângulo ao redor do rosto detectado
+            cv2.rectangle(img, (x, y), (x + w, y + h), color, 2)
+
+            # Realizar o reconhecimento facial
+            id, pred = clf.predict(gray[y:y + h, x:x + w])
+            confidence = int(100 * (1 - pred / 300))
+
+            # Exibir o nome do usuário se a confiança for alta o suficiente
+            if confidence > 77:
+                name ="Reconhecendo..."
+
+                for aluno in self.alunos:
+                    if str(id) in aluno["n_i_escolar"]:
+
+                        name=f"{aluno['nome']}"
+                        self.label_nome_h1_capture.text = f"{self.converter_nome_p_u(aluno['nome'])}"
+                        self.label_curso_h1_capture.text = f"{self.curso_conversor(aluno['turma'])}"
+                        self.nome_aluno_capture.text = f"Nome                  {aluno['nome']}"
+                        self.turma_aluno_capture.text = f"Turma                 {aluno['turma']}"
+                        self.classe_aluno_capture.text = f"Classe                    {self.classe_aluno(aluno['turma'])}"
+                        self.n_i_turma_aluno.text = f"Nº                           {aluno['n_i_turma']}"
+                        self.permicao_entrada.text = f"Permição                           {self.autorizador_entrada(aluno['mes_propina_paga'])}"
+                        self.image_aluno.source = os.path.join(self.caminho_imagem_faces_alunos,str(aluno["foto_caminho"]),"profile","frame_1.jpg")
+
+                cv2.putText(img, name, (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.8, color, 1, cv2.LINE_AA)
+            else:
+                cv2.putText(img, "UNKNOWN", (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.8, color, 1, cv2.LINE_AA)
     def update_sign(self, dt):
         ret, frame = self.capture.read()
         if ret:
@@ -458,6 +429,82 @@ class LiveApp(MDApp, App):
 
             # Atualiza a imagem na interface do usuário
             self.camera_image.texture = self.texture(frame_rgb)
+
+    def train_classifier(self,data_dir):
+        # Lista todos os arquivos no diretório de dados
+        faces = self.faces
+        ids = self.ids
+        pasta_principal=self.caminho_imagem_faces_alunos
+
+        for path_alunos in os.listdir(pasta_principal):
+            print(path_alunos)
+            for path_aluno in os.listdir(os.path.join(pasta_principal, path_alunos)):
+                if path_aluno == "gray":
+                    for image in os.listdir(os.path.join(pasta_principal, path_alunos, path_aluno)):
+
+                        image_dir=os.path.join(pasta_principal, path_alunos, path_aluno,image)
+                        # Abre a imagem e converte para escala de cinza
+                        img = cv2.imread(image_dir, cv2.IMREAD_GRAYSCALE)
+
+                        # Extrai o ID do usuário da imagem
+                        id_aluno,nome=self.separar_numeros_letras(path_alunos)
+                        print(id_aluno)
+                        id =int(id_aluno)
+
+
+                        # Armazena o rosto e o ID correspondente nas listas
+                        faces.append(img)
+                        ids.append(id)
+
+        print(faces)
+        print(ids)
+        # Converte as listas em arrays numpy
+        faces = np.array(faces, dtype=np.uint8)
+        ids = np.array(ids)
+
+        # Inicializa o classificador LBPH
+        clf = cv2.face.LBPHFaceRecognizer_create()
+
+        # Treina o classificador com os dados de treinamento
+        clf.train(faces, ids)
+
+        # Salva o modelo treinado em um arquivo XML
+        clf.save("classifier.xml")
+
+        print("Training completed successfully.")
+    def update_sign_in_dataset(self,dt):
+        faceCascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
+        def face_cropped(img):
+            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+            faces = faceCascade.detectMultiScale(gray, scaleFactor=1.3, minNeighbors=5)
+
+            for (x, y, w, h) in faces:
+                # Calcular a ampliação vertical da região capturada
+                y_start = max(0, y - int(0.1 * h))
+                y_end = min(y + int(1.1 * h), img.shape[0])
+
+                # Manter a mesma largura da região capturada
+                x_start = x
+                x_end = x + w
+
+                # Capturar a região do rosto
+                cropped_face = img[y_start:y_end, x_start:x_end]
+                return cropped_face
+
+        cap = self.capture
+        ret, frame = cap.read()
+        if face_cropped(frame) is not None:
+            self.number_frames_captured_dataset+=1
+            face = cv2.resize(face_cropped(frame), (200, 200))
+
+            gray_face = cv2.cvtColor(face, cv2.COLOR_BGR2GRAY)
+            colored_face=cv2.cvtColor(face,cv2.COLOR_BGR2RGB)
+
+            self.save_dataset_frames_gray.append(gray_face)
+            # Exibir o ID da imagem na janela
+            cv2.putText(colored_face, str(self.number_frames_captured_dataset), (50, 50), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0), 2)
+            self.camera_image.texture = self.texture(colored_face)
+
     def update_edit(self, dt):
         ret, frame = self.capture.read()
         if ret:
@@ -879,7 +926,6 @@ class LiveApp(MDApp, App):
     def send_funcionrios(self,Nome,Senha,Telefone,N_id):
         self.sign_in_funcionario(Nome,Senha,Telefone,N_id,self.connect_to_database(),self.função_sign_in)
 
-
     # FUNÇÕES DA TELA SIGN IN SCREEN
     def insert_user(self, conn, nome,n_id_escolar,n_id_turma,turma,foto_caminho,nascimnto,turno,propina):
         try:
@@ -925,20 +971,19 @@ class LiveApp(MDApp, App):
         self.N_id_turma_edit=N_id_turma
         self.Container_imagem_edit=container
         self.Propina_edit=Propina
-    def delete_aluno_image(self,id):
+    def delete_aluno_path(self,id):
         print(id)
         nome=self.alunos[int(id)-1]["nome"]
         id_esc=self.alunos[int(id)-1]["n_i_escolar"]
 
-        nome_formatado=self.convert_name_to_file(nome,id_esc)
+        nome_formatado=self.convert_name_to_path(nome,id_esc)
 
 
         caminho_absoluto = self.caminho_imagem_faces_alunos
-        for file in os.listdir(caminho_absoluto):
-            if file == nome_formatado:
 
-                file=f"{caminho_absoluto}\{nome_formatado}"
-                os.remove(file)
+        caminho_delete=os.path.join(caminho_absoluto,nome_formatado)
+        print(caminho_delete)
+        shutil.rmtree(caminho_delete)
     def delete_aluno(self, conn, id):
 
         print(id)
@@ -947,7 +992,7 @@ class LiveApp(MDApp, App):
 
             # Exclui imagem de identificação
 
-            self.delete_aluno_image(id)
+            self.delete_aluno_path(id)
 
 
             # Exclui o aluno
@@ -967,6 +1012,7 @@ class LiveApp(MDApp, App):
             self.receive_users_from_bd(self.connect_to_database())
             self.data_table.remove_row(self.data_table.row_data[int(id) - 1])
 
+            self.train_classifier(self.caminho_imagem_faces_alunos)
 
             # Mostra a mensagem de sucesso
             self.show_snackbar("Aluno Apagado com Sucesso!")
@@ -1002,26 +1048,51 @@ class LiveApp(MDApp, App):
         nome_formatado_sem_acentos = unidecode(nome_formatado)
         formatado = f"{nome_formatado_sem_acentos}{id_esc}.jpg"
         return formatado
+    def convert_name_to_path(self,nome,id_esc):
+        nome_formatado = nome.lower().replace(" ", "")
+        nome_formatado_sem_acentos = unidecode(nome_formatado)
+        formatado = f"{nome_formatado_sem_acentos}{id_esc}"
+        return formatado
     def sign_in_send(self,nome,n_id_escolar,n_id_turma,turma,nascimento,turno,propina):
 
-        if nome and n_id_turma and n_id_escolar and turma and nascimento and turno !="" and propina=="Propina":
 
-            if None in self.last_frame:
-                self.show_snackbar("Termine de Tirar Foto!")
+        if nome and n_id_turma and n_id_escolar and turma and nascimento and turno !="" and propina!="Propina":
+
+            if self.is_capturing_dataset==False:
+                self.show_snackbar("Termine de Capturar os Frames de Treinamento !")
+
+            elif self.is_capturing_profile==False:
+
+                self.show_snackbar("Termine de Tirar Foto de Perfil !")
 
             else:
+                caminho_completo,caminho_gray,caminho_profile,caminho_foto_aluno=self.create_path_aluno(nome, n_id_escolar)
+                os.makedirs(caminho_gray)
+                os.makedirs(caminho_profile)
+
+                for i, frame in enumerate(self.save_dataset_frames_gray):
+                    cv2.imwrite(os.path.join(caminho_gray, 'frame_{}.jpg'.format(i + 1)), frame)
+                cv2.imwrite(os.path.join(caminho_profile, 'frame_{}.jpg'.format(1)), self.last_frame)
+
+
+                self.save_dataset_frames_gray = [None]
+                self.last_frame=[None]
+                self.is_capturing_profile=False
+                self.is_capturing_dataset=False
+
                 converter_nascimento = str(nascimento).split("-")
                 converter_nascimento2=converter_nascimento[0].replace("'","")
                 converter_nascimento3=converter_nascimento2.split("/")
                 nascimento_convertido = f"{converter_nascimento3[2]}/{converter_nascimento3[1]}/{converter_nascimento3[0]}"
-                foto_caminho_save=self.save_last_frame(self.last_frame,nome,n_id_escolar)
-                self.insert_user(self.connect_to_database(),nome,n_id_escolar,n_id_turma,turma,foto_caminho_save,nascimento_convertido,turno,propina)
+                self.insert_user(self.connect_to_database(),nome,n_id_escolar,n_id_turma,turma,caminho_foto_aluno,nascimento_convertido,turno,propina)
+
+                self.train_classifier(self.caminho_imagem_faces_alunos)
+
                 self.show_snackbar("Usuario Guardado com Sucesso")
-                self.last_frame=[None]
+
 
         else:
             self.show_snackbar("Termine de Colocar os Dados!")
-
     def clean_textfield(self,Nome,Nascimento,Turno,Turma,N_id_escolar,N_id_turma,Propina):
         Nome.text=""
         Nascimento.text=""
@@ -1432,8 +1503,39 @@ class LiveApp(MDApp, App):
             curso = "Técnico Informático"
         if turma_inciais == "DT":
             curso = "Desenhador Projetista"
-
+        else:
+            curso="None"
         return curso
+    def separar_numeros_letras(self,string):
+        numeros = ''.join(re.findall(r'\d+', string))
+        letras = ''.join(re.findall(r'[a-zA-Z]+', string))
+        return numeros, letras
+
+    def converter_nome_p_u(self,nome):
+        converter=str(nome).split(" ")
+        nome_P_U=f"{converter[0]} {converter[-1]}"
+
+        return nome_P_U
+
+    def autorizador_entrada(self,mes):
+        meses=["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Novembro","Dezembro"]
+        mes_atual_index = datetime.datetime.now().month
+
+        if mes in meses:
+            mes_index=int(meses.index(mes))
+
+
+            if (mes_index+1)<(mes_atual_index):
+                return f"Recusado ({mes})"
+
+            elif (mes_index+1)>=(mes_atual_index):
+                return "Autorizado"
+
+    def classe_aluno(self,turma):
+        classe,letras=self.separar_numeros_letras(turma)
+        return str(classe)
+
+
 
 # finally, run the app
 if __name__ == "__main__":

@@ -34,9 +34,14 @@
                             id:btn
                             text:"Capturar"
                             md_bg_color:app.theme_cls.primary_color
-                            pos_hint:{"center_y":.1,"center_x":.40}
-                            on_release:app.start_capture_sign(container,btn)
-                            pos_hint:{"center_y":.2,"center_x":.5}
+                            on_release:app.start_capture_sign_in_dataset(container,btn)
+                            pos_hint:{"center_y":.2,"center_x":.6}
+                        MDFillRoundFlatButton:
+                            id:btn_profile
+                            text:"Profile Capture"
+                            md_bg_color:app.theme_cls.primary_color
+                            on_release:app.start_capture_sign(container,btn_profile)
+                            pos_hint:{"center_y":.2,"center_x":.4}
                         MDLabel:
                             id:fundo2
                             opacity:0
